@@ -2,7 +2,6 @@ package app.affine.pro.ai
 
 import android.content.Intent
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
@@ -26,15 +25,16 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalContext
 import androidx.core.view.ViewCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.affine.pro.ai.chat.ChatViewModel
-import app.affine.pro.ai.chat.MessageUiState
 import app.affine.pro.ai.chat.ui.ChatAppBar
 import app.affine.pro.ai.chat.ui.Message
 import app.affine.pro.ai.chat.ui.UserInput
@@ -75,46 +75,55 @@ class AIActivity : AppCompatActivity() {
                         .exclude(WindowInsets.ime),
                     modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
                 ) { paddingValues ->
-                    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+                    val messageUiState by viewModel.messagesUiState.collectAsStateWithLifecycle()
+                    val sendBtnEnable by viewModel.sendBtnUiState.collectAsStateWithLifecycle()
+
+                    val isAtTop = remember {
+                        derivedStateOf {
+                            scrollState.firstVisibleItemIndex == 0 &&
+                                    (scrollState.firstVisibleItemScrollOffset == 0 || messageUiState.messages.isEmpty())
+                        }
+                    }
+
+                    LaunchedEffect(messageUiState) {
+                        scrollState.animateScrollToItem(0)
+                    }
+
                     Column(
                         Modifier
                             .fillMaxSize()
                             .padding(paddingValues)
                     ) {
                         Box(Modifier.weight(1f)) {
-                            with(uiState) {
-                                when {
-                                    this is MessageUiState -> LazyColumn(
-                                        reverseLayout = true,
-                                        state = scrollState,
-                                        modifier = Modifier.fillMaxSize(),
-                                    ) {
-                                        items(
-                                            items = messages,
-                                            key = { it.id ?: "" },
-                                            contentType = { it.role }
-                                        ) { message ->
-                                            Message(message)
-                                        }
+                            with(messageUiState) {
+                                LazyColumn(
+                                    reverseLayout = true,
+                                    state = scrollState,
+                                    modifier = Modifier.fillMaxSize(),
+                                ) {
+                                    items(
+                                        items = messages,
+                                        key = { it.id ?: "" },
+                                        contentType = { it.role }
+                                    ) { message ->
+                                        Message(message)
                                     }
                                 }
                             }
                         }
-                        val context = LocalContext.current
                         UserInput(
+                            modifier = Modifier
+                                .navigationBarsPadding()
+                                .imePadding(),
                             onMessageSent = { content ->
-                                Toast.makeText(context, "Not implemented.", Toast.LENGTH_SHORT)
-                                    .show()
-//                                viewModel.sendMessage(content)
+                                viewModel.sendMessage(content)
                             },
+                            sendMessageEnabled = sendBtnEnable,
                             resetScroll = {
                                 scope.launch {
                                     scrollState.scrollToItem(0)
                                 }
                             },
-                            modifier = Modifier
-                                .navigationBarsPadding()
-                                .imePadding()
                         )
                     }
                 }

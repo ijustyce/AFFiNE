@@ -71,8 +71,9 @@ fun UserInputPreview() {
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun UserInput(
-    onMessageSent: (String) -> Unit,
     modifier: Modifier = Modifier,
+    onMessageSent: (String) -> Unit,
+    sendMessageEnabled: Boolean = true,
     resetScroll: () -> Unit = {},
 ) {
     var currentInputSelector by rememberSaveable { mutableStateOf(InputSelector.NONE) }
@@ -116,17 +117,15 @@ fun UserInput(
                 onMessageSent = {
                     onMessageSent(textState.text)
                     textState = TextFieldValue()
-                    resetScroll()
                 },
                 focusState = textFieldFocusState
             )
             UserInputSelector(
                 onSelectorChange = { currentInputSelector = it },
-                sendMessageEnabled = textState.text.isNotBlank(),
+                sendMessageEnabled = textState.text.isNotBlank() && sendMessageEnabled,
                 onMessageSent = {
                     onMessageSent(textState.text)
                     textState = TextFieldValue()
-                    resetScroll()
                     dismissKeyboard()
                 },
             )

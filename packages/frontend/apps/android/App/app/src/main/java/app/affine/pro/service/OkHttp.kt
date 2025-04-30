@@ -1,6 +1,7 @@
 package app.affine.pro.service
 
 import app.affine.pro.AffineApp
+import app.affine.pro.CapacitorConfig
 import app.affine.pro.utils.dataStore
 import app.affine.pro.utils.set
 import com.google.firebase.crashlytics.ktx.crashlytics
@@ -32,6 +33,14 @@ object OkHttp {
                 CookieStore.saveCookies(url.host, cookies)
             }
         })
+        .addInterceptor {
+            it.proceed(
+                it.request()
+                    .newBuilder()
+                    .addHeader("x-affine-version", CapacitorConfig.getAffineVersion())
+                    .build()
+            )
+        }
         .addInterceptor(HttpLoggingInterceptor { msg ->
             Timber.d(msg)
         }.apply {
