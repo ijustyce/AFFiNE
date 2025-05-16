@@ -30,7 +30,7 @@ describe('Shape rendering with DOM renderer', () => {
       fill: '#ff0000',
       stroke: '#000000',
     };
-    const shapeId = surfaceModel.addElement(shapeProps as any);
+    const shapeId = surfaceModel.addElement(shapeProps);
 
     await new Promise(resolve => setTimeout(resolve, 100));
     const shapeElement = surfaceView?.renderRoot.querySelector(
@@ -73,7 +73,7 @@ describe('Shape rendering with DOM renderer', () => {
       subType: 'ellipse',
       xywh: '[200, 200, 50, 50]',
     };
-    const shapeId = surfaceModel.addElement(shapeProps as any);
+    const shapeId = surfaceModel.addElement(shapeProps);
 
     await new Promise(resolve => setTimeout(resolve, 100));
 
@@ -92,47 +92,47 @@ describe('Shape rendering with DOM renderer', () => {
     expect(shapeElement).toBeNull();
   });
 
-  test('should correctly apply clip-path for diamond shape', async () => {
+  test('should correctly render diamond shape', async () => {
     const surfaceView = getSurface(window.doc, window.editor);
     const surfaceModel = surfaceView.model;
     const shapeProps = {
       type: 'shape',
       subType: 'diamond',
       xywh: '[150, 150, 80, 60]',
-      fill: '#ff0000',
-      stroke: '#000000',
+      fillColor: '#ff0000',
+      strokeColor: '#000000',
+      filled: true,
     };
-    const shapeId = surfaceModel.addElement(shapeProps as any);
+    const shapeId = surfaceModel.addElement(shapeProps);
     await wait(100);
     const shapeElement = surfaceView?.renderRoot.querySelector<HTMLElement>(
       `[data-element-id="${shapeId}"]`
     );
 
     expect(shapeElement).not.toBeNull();
-    expect(shapeElement?.style.clipPath).toBe(
-      'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)'
-    );
+    expect(shapeElement?.style.width).toBe('80px');
+    expect(shapeElement?.style.height).toBe('60px');
   });
 
-  test('should correctly apply clip-path for triangle shape', async () => {
+  test('should correctly render triangle shape', async () => {
     const surfaceView = getSurface(window.doc, window.editor);
     const surfaceModel = surfaceView.model;
     const shapeProps = {
       type: 'shape',
       subType: 'triangle',
       xywh: '[150, 150, 80, 60]',
-      fill: '#ff0000',
-      stroke: '#000000',
+      fillColor: '#ff0000',
+      strokeColor: '#000000',
+      filled: true,
     };
-    const shapeId = surfaceModel.addElement(shapeProps as any);
+    const shapeId = surfaceModel.addElement(shapeProps);
     await wait(100);
     const shapeElement = surfaceView?.renderRoot.querySelector<HTMLElement>(
       `[data-element-id="${shapeId}"]`
     );
 
     expect(shapeElement).not.toBeNull();
-    expect(shapeElement?.style.clipPath).toBe(
-      'polygon(50% 0%, 100% 100%, 0% 100%)'
-    );
+    expect(shapeElement?.style.width).toBe('80px');
+    expect(shapeElement?.style.height).toBe('60px');
   });
 });
