@@ -91,4 +91,48 @@ describe('Shape rendering with DOM renderer', () => {
     );
     expect(shapeElement).toBeNull();
   });
+
+  test('should correctly apply clip-path for diamond shape', async () => {
+    const surfaceView = getSurface(window.doc, window.editor);
+    const surfaceModel = surfaceView.model;
+    const shapeProps = {
+      type: 'shape',
+      subType: 'diamond',
+      xywh: '[150, 150, 80, 60]',
+      fill: '#ff0000',
+      stroke: '#000000',
+    };
+    const shapeId = surfaceModel.addElement(shapeProps as any);
+    await wait(100);
+    const shapeElement = surfaceView?.renderRoot.querySelector<HTMLElement>(
+      `[data-element-id="${shapeId}"]`
+    );
+
+    expect(shapeElement).not.toBeNull();
+    expect(shapeElement?.style.clipPath).toBe(
+      'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)'
+    );
+  });
+
+  test('should correctly apply clip-path for triangle shape', async () => {
+    const surfaceView = getSurface(window.doc, window.editor);
+    const surfaceModel = surfaceView.model;
+    const shapeProps = {
+      type: 'shape',
+      subType: 'triangle',
+      xywh: '[150, 150, 80, 60]',
+      fill: '#ff0000',
+      stroke: '#000000',
+    };
+    const shapeId = surfaceModel.addElement(shapeProps as any);
+    await wait(100);
+    const shapeElement = surfaceView?.renderRoot.querySelector<HTMLElement>(
+      `[data-element-id="${shapeId}"]`
+    );
+
+    expect(shapeElement).not.toBeNull();
+    expect(shapeElement?.style.clipPath).toBe(
+      'polygon(50% 0%, 100% 100%, 0% 100%)'
+    );
+  });
 });
