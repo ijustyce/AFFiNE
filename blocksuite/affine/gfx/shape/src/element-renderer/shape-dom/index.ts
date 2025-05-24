@@ -10,26 +10,32 @@ function applyShapeSpecificStyles(
   zoom: number
 ) {
   // Reset properties that might be set by different shape types
-  element.style.clipPath = '';
-  element.style.borderRadius = '';
-  // Clear innerHTML for shapes that don't use SVG, or if type changes from SVG-based to non-SVG-based
+  element.style.removeProperty('clip-path');
+  element.style.removeProperty('border-radius');
+  // Clear DOM for shapes that don't use SVG, or if type changes from SVG-based to non-SVG-based
   if (model.shapeType !== 'diamond' && model.shapeType !== 'triangle') {
-    element.innerHTML = '';
+    while (element.firstChild) element.firstChild.remove();
   }
 
-  if (model.shapeType === 'rect') {
-    const w = model.w * zoom;
-    const h = model.h * zoom;
-    const r = model.radius ?? 0;
-    const borderRadius =
-      r < 1 ? `${Math.min(w * r, h * r)}px` : `${r * zoom}px`;
-    element.style.borderRadius = borderRadius;
-  } else if (model.shapeType === 'ellipse') {
-    element.style.borderRadius = '50%';
-  } else if (model.shapeType === 'diamond') {
-    element.style.clipPath = 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)';
-  } else if (model.shapeType === 'triangle') {
-    element.style.clipPath = 'polygon(50% 0%, 100% 100%, 0% 100%)';
+  switch (model.shapeType) {
+    case 'rect': {
+      const w = model.w * zoom;
+      const h = model.h * zoom;
+      const r = model.radius ?? 0;
+      const borderRadius =
+        r < 1 ? `${Math.min(w * r, h * r)}px` : `${r * zoom}px`;
+      element.style.borderRadius = borderRadius;
+      break;
+    }
+    case 'ellipse':
+      element.style.borderRadius = '50%';
+      break;
+    case 'diamond':
+      element.style.clipPath = 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)';
+      break;
+    case 'triangle':
+      element.style.clipPath = 'polygon(50% 0%, 100% 100%, 0% 100%)';
+      break;
   }
   // No 'else' needed to clear styles, as they are reset at the beginning of the function.
 }
@@ -121,18 +127,20 @@ export const shapeDomRenderer = (
     let svgPoints = '';
     if (model.shapeType === 'diamond') {
       // Adjusted points for diamond
-      svgPoints = `\
-${unscaledWidth / 2},${halfStroke} \
-${unscaledWidth - halfStroke},${unscaledHeight / 2} \
-${unscaledWidth / 2},${unscaledHeight - halfStroke} \
-${halfStroke},${unscaledHeight / 2}`;
+      svgPoints = [
+        `${unscaledWidth / 2},${halfStroke}`,
+        `${unscaledWidth - halfStroke},${unscaledHeight / 2}`,
+        `${unscaledWidth / 2},${unscaledHeight - halfStroke}`,
+        `${halfStroke},${unscaledHeight / 2}`,
+      ].join(' ');
     } else {
       // triangle
       // Adjusted points for triangle
-      svgPoints = `\
-${unscaledWidth / 2},${halfStroke} \
-${unscaledWidth - halfStroke},${unscaledHeight - halfStroke} \
-${halfStroke},${unscaledHeight - halfStroke}`;
+      svgPoints = [
+        `${unscaledWidth / 2},${halfStroke}`,
+        `${unscaledWidth - halfStroke},${unscaledHeight - halfStroke}`,
+        `${halfStroke},${unscaledHeight - halfStroke}`,
+      ].join(' ');
     }
 
     // Determine if stroke should be visible and its color
@@ -146,17 +154,26 @@ ${halfStroke},${unscaledHeight - halfStroke}`;
     // Determine fill color
     const finalFillColor = model.filled ? fillColor : 'transparent';
 
-    element.innerHTML = `
-      <svg width="100%" height="100%" viewBox="0 0 ${unscaledWidth} ${unscaledHeight}" preserveAspectRatio="none">
-        <polygon
-          points="${svgPoints}"
-          fill="${finalFillColor}"
-          stroke="${finalStrokeColor}"
-          stroke-width="${strokeW}"
-          stroke-dasharray="${finalStrokeDasharray}"
-        />
-      </svg>
-    `;
+    // Build SVG safely with DOM-API
+    const SVG_NS = 'http://www.w3.org/2000/svg';
+    const svg = document.createElementNS(SVG_NS, 'svg');
+    svg.setAttribute('width', '100%');
+    svg.setAttribute('height', '100%');
+    svg.setAttribute('viewBox', `0 0 ${unscaledWidth} ${unscaledHeight}`);
+    svg.setAttribute('preserveAspectRatio', 'none');
+
+    const polygon = document.createElementNS(SVG_NS, 'polygon');
+    polygon.setAttribute('points', svgPoints);
+    polygon.setAttribute('fill', finalFillColor);
+    polygon.setAttribute('stroke', finalStrokeColor);
+    polygon.setAttribute('stroke-width', String(strokeW));
+    if (finalStrokeDasharray !== 'none') {
+      polygon.setAttribute('stroke-dasharray', finalStrokeDasharray);
+    }
+    svg.append(polygon);
+
+    // Replace existing children to avoid memory leaks
+    element.replaceChildren(svg);
   } else {
     // Standard rendering for other shapes (e.g., rect, ellipse)
     // innerHTML was already cleared by applyShapeSpecificStyles if necessary
