@@ -86,7 +86,7 @@ class AIActivity : AppCompatActivity() {
                     }
 
                     LaunchedEffect(messageUiState) {
-                        scrollState.animateScrollToItem(0)
+                        if (isAtTop.value) scrollState.animateScrollToItem(0)
                     }
 
                     Column(

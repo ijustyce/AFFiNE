@@ -92,7 +92,7 @@ class ChatViewModel @Inject constructor(
                     Timber.d("On sse event: $event")
                     when (event.type) {
                         "message" -> _messagesUiState.update { state ->
-                            state.updateMessageAt(state.messages.lastIndex) { message ->
+                            state.updateMessageAt(0) { message ->
                                 message.copy(content = message.content + event.data)
                             }
                         }
@@ -111,7 +111,7 @@ class ChatViewModel @Inject constructor(
             ).getOrElse { emptyList() }
             if (ids.isNotEmpty() && ids.size == _messagesUiState.value.messages.size) {
                 _messagesUiState.update { state ->
-                    state.updateMessageAt(state.messages.lastIndex) { message ->
+                    state.updateMessageAt(0) { message ->
                         message.copy(id = ids[0].id)
                     }
                 }

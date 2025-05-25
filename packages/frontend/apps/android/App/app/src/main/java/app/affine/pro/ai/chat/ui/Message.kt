@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import app.affine.pro.R
 import app.affine.pro.ai.chat.ChatMessage
+import app.affine.pro.components.MarkdownText
 import kotlinx.datetime.Clock
 
 @Composable
@@ -62,11 +63,14 @@ fun Message(message: ChatMessage) {
             )
         }
         Spacer(Modifier.height(8.dp))
-        Text(
-            text = message.content,
-            color = Color.White,
-            fontSize = 16.sp,
-        )
+        when (message.role) {
+            ChatMessage.Role.User -> Text(
+                text = message.content,
+                color = Color.White,
+                fontSize = 16.sp,
+            )
+            ChatMessage.Role.AI -> MarkdownText(markdown = message.content)
+        }
     }
 }
 
