@@ -15,7 +15,10 @@ import {
   type ToolbarModuleConfig,
   ToolbarModuleExtension,
 } from '@blocksuite/affine-shared/services';
-import { getBlockProps } from '@blocksuite/affine-shared/utils';
+import {
+  getBlockProps,
+  openSingleFileWith,
+} from '@blocksuite/affine-shared/utils';
 import { Bound } from '@blocksuite/global/gfx';
 import {
   CaptionIcon,
@@ -24,6 +27,7 @@ import {
   DownloadIcon,
   DuplicateIcon,
   EditIcon,
+  ReplaceIcon,
   ResetIcon,
 } from '@blocksuite/icons/lit';
 import { BlockFlavourIdentifier } from '@blocksuite/std';
@@ -151,8 +155,23 @@ export const attachmentViewDropdownMenu = {
   },
 } as const satisfies ToolbarActionGroup<ToolbarAction>;
 
+const replaceAction = {
+  id: 'c.replace',
+  tooltip: 'Replace',
+  icon: ReplaceIcon(),
+  run(ctx) {
+    const block = ctx.getCurrentBlockByType(AttachmentBlockComponent);
+    if (!block) return;
+
+    const uploading = block.resourceController.state$.peek().uploading;
+    if (uploading) return;
+
+    openSingleFileWith().catch(console.error);
+  },
+} as const satisfies ToolbarAction;
+
 const downloadAction = {
-  id: 'c.download',
+  id: 'd.download',
   tooltip: 'Download',
   icon: DownloadIcon(),
   run(ctx) {
@@ -168,7 +187,7 @@ const downloadAction = {
 } as const satisfies ToolbarAction;
 
 const captionAction = {
-  id: 'd.caption',
+  id: 'e.caption',
   tooltip: 'Caption',
   icon: CaptionIcon(),
   run(ctx) {
@@ -221,6 +240,7 @@ const builtinToolbarConfig = {
       },
     },
     attachmentViewDropdownMenu,
+    replaceAction,
     downloadAction,
     captionAction,
     {
@@ -355,12 +375,16 @@ const builtinSurfaceToolbarConfig = {
       },
     } satisfies ToolbarActionGroup<ToolbarAction>,
     {
+      ...replaceAction,
+      id: 'd.replace',
+    },
+    {
       ...downloadAction,
-      id: 'd.download',
+      id: 'e.download',
     },
     {
       ...captionAction,
-      id: 'e.caption',
+      id: 'f.caption',
     },
   ],
   when: ctx => ctx.getSurfaceModelsByType(AttachmentBlockModel).length === 1,

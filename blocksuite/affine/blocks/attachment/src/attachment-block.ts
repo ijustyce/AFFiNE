@@ -21,7 +21,10 @@ import {
   FileSizeLimitProvider,
   TelemetryProvider,
 } from '@blocksuite/affine-shared/services';
-import { formatSize } from '@blocksuite/affine-shared/utils';
+import {
+  formatSize,
+  openSingleFileWith,
+} from '@blocksuite/affine-shared/utils';
 import {
   AttachmentIcon,
   ResetIcon,
@@ -124,6 +127,11 @@ export class AttachmentBlockComponent extends CaptionedBlockComponent<Attachment
     }
 
     this.refreshData();
+  };
+
+  replace = async () => {
+    const file = await openSingleFileWith();
+    if (!file) return;
   };
 
   private _selectBlock() {
