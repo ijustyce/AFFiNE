@@ -30,8 +30,8 @@ export class CaptionedBlockComponent<
     return this._captionEditorRef.value;
   }
 
-  constructor() {
-    super();
+  override connectedCallback() {
+    super.connectedCallback();
     this.addRenderer(this._renderWithWidget);
   }
 

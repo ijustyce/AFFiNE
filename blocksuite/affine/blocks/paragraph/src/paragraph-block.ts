@@ -7,7 +7,10 @@ import {
   BLOCK_CHILDREN_CONTAINER_PADDING_LEFT,
   EDGELESS_TOP_CONTENTEDITABLE_SELECTOR,
 } from '@blocksuite/affine-shared/consts';
-import { DocModeProvider } from '@blocksuite/affine-shared/services';
+import {
+  CitationProvider,
+  DocModeProvider,
+} from '@blocksuite/affine-shared/services';
 import {
   calculateCollapsedSiblings,
   getNearestHeadingBefore,
@@ -63,6 +66,10 @@ export class ParagraphBlockComponent extends CaptionedBlockComponent<ParagraphBl
       ?.getPlaceholder(this.model);
   }
 
+  get citationService() {
+    return this.std.get(CitationProvider);
+  }
+
   get attributeRenderer() {
     return this.inlineManager.getRenderer();
   }
@@ -73,6 +80,12 @@ export class ParagraphBlockComponent extends CaptionedBlockComponent<ParagraphBl
 
   get collapsedSiblings() {
     return calculateCollapsedSiblings(this.model);
+  }
+
+  get hasCitationSiblings() {
+    return this.collapsedSiblings.some(sibling =>
+      this.citationService.isCitationModel(sibling)
+    );
   }
 
   get embedChecker() {
@@ -284,6 +297,13 @@ export class ParagraphBlockComponent extends CaptionedBlockComponent<ParagraphBl
                       this.store.captureSync();
                       this.store.updateBlock(this.model, {
                         collapsed: value,
+                      });
+                    }
+
+                    if (this.hasCitationSiblings) {
+                      this.citationService.trackEvent('Expand', {
+                        control: 'Source Button',
+                        type: value ? 'Hide' : 'Show',
                       });
                     }
                   }}

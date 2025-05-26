@@ -6,6 +6,7 @@ import { BookmarkBlockSchema } from '@blocksuite/affine-model';
 import { BlockViewExtension, FlavourExtension } from '@blocksuite/std';
 import { literal } from 'lit/static-html.js';
 
+import { BookmarkCitationRendererExtension } from './bookmark-citation-renderer';
 import { BookmarkBlockInteraction } from './bookmark-edgeless-block';
 import { BookmarkSlashMenuConfigExtension } from './configs/slash-menu';
 import { createBuiltinToolbarConfigExtension } from './configs/toolbar';
@@ -32,6 +33,7 @@ export class BookmarkViewExtension extends ViewExtensionProvider {
           : literal`affine-bookmark`;
       }),
       BookmarkSlashMenuConfigExtension,
+      BookmarkCitationRendererExtension,
     ]);
     context.register(createBuiltinToolbarConfigExtension(flavour));
     const isEdgeless = this.isEdgeless(context.scope);

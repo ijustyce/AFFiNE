@@ -335,7 +335,7 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockComponent<EmbedSynce
     store.deleteBlock(this.model);
   };
 
-  protected override embedContainerStyle: StyleInfo = {
+  override embedContainerStyle: StyleInfo = {
     height: 'unset',
   };
 

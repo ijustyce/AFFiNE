@@ -6,6 +6,7 @@ import { literal } from 'lit/static-html.js';
 import { LinkedDocSlashMenuConfigExtension } from './configs/slash-menu';
 import { createBuiltinToolbarConfigExtension } from './configs/toolbar';
 import { EmbedLinkedDocInteraction } from './embed-edgeless-linked-doc-block';
+import { EmbedLinkedDocCitationRendererExtension } from './embed-linked-doc-citation-renderer';
 
 const flavour = EmbedLinkedDocBlockSchema.model.flavour;
 
@@ -18,4 +19,5 @@ export const EmbedLinkedDocViewExtensions: ExtensionType[] = [
   createBuiltinToolbarConfigExtension(flavour),
   EmbedLinkedDocInteraction,
   LinkedDocSlashMenuConfigExtension,
+  EmbedLinkedDocCitationRendererExtension,
 ].flat();

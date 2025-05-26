@@ -57,7 +57,7 @@ export class EmbedBlockComponent<
    * You can use this to change the height and width of the card.
    * By default, the height and width are set to `_cardHeight` and `_cardWidth` respectively.
    */
-  protected embedContainerStyle: StyleInfo = {};
+  embedContainerStyle: StyleInfo = {};
 
   renderEmbed = (content: () => TemplateResult) => {
     if (

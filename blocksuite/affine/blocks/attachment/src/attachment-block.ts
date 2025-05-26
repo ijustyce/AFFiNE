@@ -17,6 +17,7 @@ import {
   AttachmentBlockStyles,
 } from '@blocksuite/affine-model';
 import {
+  CitationProvider,
   DocModeProvider,
   FileSizeLimitProvider,
   TelemetryProvider,
@@ -31,12 +32,13 @@ import {
 import { BlockSelection } from '@blocksuite/std';
 import { nanoid, Slice } from '@blocksuite/store';
 import { computed, signal } from '@preact/signals-core';
-import { html, type TemplateResult } from 'lit';
+import { html, nothing, type TemplateResult } from 'lit';
 import { choose } from 'lit/directives/choose.js';
 import { type ClassInfo, classMap } from 'lit/directives/class-map.js';
 import { guard } from 'lit/directives/guard.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { when } from 'lit/directives/when.js';
+import { filter } from 'rxjs/operators';
 
 import { AttachmentEmbedProvider } from './embed';
 import { styles } from './styles';
@@ -69,7 +71,7 @@ export class AttachmentBlockComponent extends CaptionedBlockComponent<Attachment
     return name.split('.').pop() ?? '';
   }
 
-  protected containerStyleMap = styleMap({
+  containerStyleMap = styleMap({
     position: 'relative',
     width: '100%',
     margin: '18px 0px',
@@ -80,7 +82,11 @@ export class AttachmentBlockComponent extends CaptionedBlockComponent<Attachment
   }
 
   get isCitation() {
-    return !!this.model.props.footnoteIdentifier;
+    return this.citationService.isCitationModel(this.model);
+  }
+
+  get citationService() {
+    return this.std.get(CitationProvider);
   }
 
   convertTo = () => {
@@ -139,6 +145,34 @@ export class AttachmentBlockComponent extends CaptionedBlockComponent<Attachment
     selectionManager.setGroup('note', [blockSelection]);
   }
 
+  private readonly _trackCitationDeleteEvent = () => {
+    // Check citation delete event
+    this._disposables.add(
+      this.std.store.slots.blockUpdated
+        .pipe(
+          filter(payload => {
+            if (!payload.isLocal) return false;
+
+            const { flavour, id, type } = payload;
+            if (
+              type !== 'delete' ||
+              flavour !== this.model.flavour ||
+              id !== this.model.id
+            )
+              return false;
+
+            const { model } = payload;
+            if (!this.citationService.isCitationModel(model)) return false;
+
+            return true;
+          })
+        )
+        .subscribe(() => {
+          this.citationService.trackEvent('Delete');
+        })
+    );
+  };
+
   override connectedCallback() {
     super.connectedCallback();
 
@@ -162,6 +196,8 @@ export class AttachmentBlockComponent extends CaptionedBlockComponent<Attachment
         });
       });
     }
+
+    this._trackCitationDeleteEvent();
   }
 
   override firstUpdated() {
@@ -169,16 +205,18 @@ export class AttachmentBlockComponent extends CaptionedBlockComponent<Attachment
     this.disposables.addFromEvent(this, 'click', this.onClick);
   }
 
-  protected onClick(event: MouseEvent) {
+  onClick = (event: MouseEvent) => {
     // the peek view need handle shift + click
     if (event.defaultPrevented) return;
 
     event.stopPropagation();
 
+    if (this.store.readonly) return;
+
     if (!this.selected$.peek()) {
       this._selectBlock();
     }
-  }
+  };
 
   protected renderUpgradeButton = () => {
     if (this.std.store.readonly) return null;
@@ -404,18 +442,6 @@ export class AttachmentBlockComponent extends CaptionedBlockComponent<Attachment
     `;
   };
 
-  private readonly _renderCitation = () => {
-    const { name, footnoteIdentifier } = this.model.props;
-    const icon = getAttachmentFileIcon(this.filetype);
-
-    return html`<affine-citation-card
-      .icon=${icon}
-      .citationTitle=${name}
-      .citationIdentifier=${footnoteIdentifier}
-      .active=${this.selected$.value}
-    ></affine-citation-card>`;
-  };
-
   override renderBlock() {
     return html`
       <div
@@ -427,7 +453,7 @@ export class AttachmentBlockComponent extends CaptionedBlockComponent<Attachment
       >
         ${when(
           this.isCitation,
-          () => this._renderCitation(),
+          () => nothing,
           () => this.renderEmbedView() ?? this.renderCardView()
         )}
       </div>

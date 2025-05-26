@@ -8,16 +8,19 @@ import type {
 } from '@blocksuite/affine-model';
 import { ImageProxyService } from '@blocksuite/affine-shared/adapters';
 import {
+  CitationProvider,
   DocModeProvider,
   LinkPreviewServiceIdentifier,
 } from '@blocksuite/affine-shared/services';
 import { normalizeUrl } from '@blocksuite/affine-shared/utils';
 import { BlockSelection } from '@blocksuite/std';
 import { computed, type ReadonlySignal, signal } from '@preact/signals-core';
-import { html } from 'lit';
+import { html, nothing } from 'lit';
 import { property, query } from 'lit/decorators.js';
 import { type ClassInfo, classMap } from 'lit/directives/class-map.js';
 import { type StyleInfo, styleMap } from 'lit/directives/style-map.js';
+import { when } from 'lit/directives/when.js';
+import { filter } from 'rxjs/operators';
 
 import { refreshBookmarkUrlData } from './utils.js';
 
@@ -34,7 +37,7 @@ export class BookmarkBlockComponent extends CaptionedBlockComponent<BookmarkBloc
 
   blockDraggable = true;
 
-  protected containerStyleMap!: ReturnType<typeof styleMap>;
+  containerStyleMap!: ReturnType<typeof styleMap>;
 
   /**
    * @description Local link preview data
@@ -115,10 +118,11 @@ export class BookmarkBlockComponent extends CaptionedBlockComponent<BookmarkBloc
   };
 
   get isCitation() {
-    return (
-      !!this.model.props.footnoteIdentifier &&
-      this.model.props.style === 'citation'
-    );
+    return this.citationService.isCitationModel(this.model);
+  }
+
+  get citationService() {
+    return this.std.get(CitationProvider);
   }
 
   get imageProxyService() {
@@ -141,29 +145,40 @@ export class BookmarkBlockComponent extends CaptionedBlockComponent<BookmarkBloc
     this.open();
   };
 
-  private readonly _renderCitationView = () => {
-    const { url, footnoteIdentifier } = this.model.props;
-    const { icon, title, description } = this.linkPreview$.value;
-    const iconSrc = icon ? this.imageProxyService.buildUrl(icon) : undefined;
-    return html`
-      <affine-citation-card
-        .icon=${iconSrc}
-        .citationTitle=${title || url}
-        .citationContent=${description}
-        .citationIdentifier=${footnoteIdentifier}
-        .onClickCallback=${this.handleClick}
-        .onDoubleClickCallback=${this.handleDoubleClick}
-        .active=${this.selected$.value}
-      ></affine-citation-card>
-    `;
-  };
-
   private readonly _renderCardView = () => {
     return html`<bookmark-card
       .bookmark=${this}
       .loading=${this.loading}
       .error=${this.error}
     ></bookmark-card>`;
+  };
+
+  private readonly _trackCitationDeleteEvent = () => {
+    // Check citation delete event
+    this._disposables.add(
+      this.std.store.slots.blockUpdated
+        .pipe(
+          filter(payload => {
+            if (!payload.isLocal) return false;
+
+            const { flavour, id, type } = payload;
+            if (
+              type !== 'delete' ||
+              flavour !== this.model.flavour ||
+              id !== this.model.id
+            )
+              return false;
+
+            const { model } = payload;
+            if (!this.citationService.isCitationModel(model)) return false;
+
+            return true;
+          })
+        )
+        .subscribe(() => {
+          this.citationService.trackEvent('Delete');
+        })
+    );
   };
 
   override connectedCallback() {
@@ -203,6 +218,8 @@ export class BookmarkBlockComponent extends CaptionedBlockComponent<BookmarkBloc
         }
       })
     );
+
+    this._trackCitationDeleteEvent();
   }
 
   override disconnectedCallback(): void {
@@ -211,18 +228,22 @@ export class BookmarkBlockComponent extends CaptionedBlockComponent<BookmarkBloc
   }
 
   override renderBlock() {
-    return html`
-      <div
-        draggable="${this.blockDraggable ? 'true' : 'false'}"
-        class=${classMap({
-          'affine-bookmark-container': true,
-          ...this.selectedStyle$?.value,
-        })}
-        style=${this.containerStyleMap}
-      >
-        ${this.isCitation ? this._renderCitationView() : this._renderCardView()}
-      </div>
-    `;
+    return when(
+      this.isCitation,
+      () => nothing,
+      () => html`
+        <div
+          draggable="${this.blockDraggable ? 'true' : 'false'}"
+          class=${classMap({
+            'affine-bookmark-container': true,
+            ...this.selectedStyle$?.value,
+          })}
+          style=${this.containerStyleMap}
+        >
+          ${this._renderCardView()}
+        </div>
+      `
+    );
   }
 
   protected override accessor blockContainerStyles: StyleInfo = {

@@ -28,7 +28,7 @@ export function toEdgelessEmbedBlock<
 
     override blockDraggable = false;
 
-    protected override embedContainerStyle: StyleInfo = {};
+    override embedContainerStyle: StyleInfo = {};
 
     override [GfxElementSymbol] = true;
 

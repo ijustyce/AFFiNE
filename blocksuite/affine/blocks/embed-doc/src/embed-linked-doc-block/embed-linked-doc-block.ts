@@ -17,6 +17,7 @@ import {
   REFERENCE_NODE,
 } from '@blocksuite/affine-shared/consts';
 import {
+  CitationProvider,
   DocDisplayMetaProvider,
   DocModeProvider,
   OpenDocExtensionIdentifier,
@@ -40,9 +41,9 @@ import { html, nothing } from 'lit';
 import { property, queryAsync, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { repeat } from 'lit/directives/repeat.js';
-import { styleMap } from 'lit/directives/style-map.js';
 import { when } from 'lit/directives/when.js';
 import throttle from 'lodash-es/throttle';
+import { filter } from 'rxjs/operators';
 import * as Y from 'yjs';
 
 import { renderLinkedDocInCard } from '../common/render-linked-doc';
@@ -255,13 +256,14 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<EmbedLinke
   }
 
   get isCitation() {
-    return (
-      !!this.model.props.footnoteIdentifier &&
-      this.model.props.style === 'citation'
-    );
+    return this.citationService.isCitationModel(this.model);
   }
 
-  private readonly _handleDoubleClick = (event: MouseEvent) => {
+  get citationService() {
+    return this.std.get(CitationProvider);
+  }
+
+  handleDoubleClick = (event: MouseEvent) => {
     event.stopPropagation();
     const openDocService = this.std.get(OpenDocExtensionIdentifier);
     const shouldOpenInPeek =
@@ -282,7 +284,7 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<EmbedLinke
     return !!linkedDoc && this.isNoteContentEmpty && this.isBannerEmpty;
   }
 
-  protected _handleClick = (event: MouseEvent) => {
+  handleClick = (event: MouseEvent) => {
     if (isNewTabTrigger(event)) {
       this.open({ openMode: 'open-in-new-tab', event });
     } else if (isNewViewTrigger(event)) {
@@ -293,29 +295,6 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<EmbedLinke
       return;
     }
     this._selectBlock();
-  };
-
-  private readonly _renderCitationView = () => {
-    const { footnoteIdentifier } = this.model.props;
-    return html`<div
-      draggable="${this.blockDraggable ? 'true' : 'false'}"
-      class=${classMap({
-        'embed-block-container': true,
-        ...this.selectedStyle$?.value,
-      })}
-      style=${styleMap({
-        ...this.embedContainerStyle,
-      })}
-    >
-      <affine-citation-card
-        .icon=${this.icon$.value}
-        .citationTitle=${this.title$.value}
-        .citationIdentifier=${footnoteIdentifier}
-        .active=${this.selected$.value}
-        .onClickCallback=${this._handleClick}
-        .onDoubleClickCallback=${this._handleDoubleClick}
-      ></affine-citation-card>
-    </div> `;
   };
 
   private readonly _renderEmbedView = () => {
@@ -384,8 +363,8 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<EmbedLinke
       () => html`
         <div
           class="affine-embed-linked-doc-block ${cardClassMap}"
-          @click=${this._handleClick}
-          @dblclick=${this._handleDoubleClick}
+          @click=${this.handleClick}
+          @dblclick=${this.handleDoubleClick}
         >
           <div class="affine-embed-linked-doc-content">
             <div class="affine-embed-linked-doc-content-title">
@@ -451,6 +430,34 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<EmbedLinke
             : nothing}
         </div>
       `
+    );
+  };
+
+  private readonly _trackCitationDeleteEvent = () => {
+    // Check citation delete event
+    this._disposables.add(
+      this.std.store.slots.blockUpdated
+        .pipe(
+          filter(payload => {
+            if (!payload.isLocal) return false;
+
+            const { flavour, id, type } = payload;
+            if (
+              type !== 'delete' ||
+              flavour !== this.model.flavour ||
+              id !== this.model.id
+            )
+              return false;
+
+            const { model } = payload;
+            if (!this.citationService.isCitationModel(model)) return false;
+
+            return true;
+          })
+        )
+        .subscribe(() => {
+          this.citationService.trackEvent('Delete');
+        })
     );
   };
 
@@ -532,6 +539,8 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<EmbedLinke
         }
       })
     );
+
+    this._trackCitationDeleteEvent();
   }
 
   getInitialState(): {
@@ -544,9 +553,11 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<EmbedLinke
   }
 
   override renderBlock() {
-    return this.isCitation
-      ? this._renderCitationView()
-      : this._renderEmbedView();
+    return when(
+      this.isCitation,
+      () => nothing,
+      () => this._renderEmbedView()
+    );
   }
 
   override updated() {

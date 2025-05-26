@@ -1,5 +1,6 @@
 export * from './adapters';
 export * from './attachment-block';
+export * from './attachment-citation-renderer';
 export * from './attachment-service';
 export { attachmentViewDropdownMenu } from './configs/toolbar';
 export * from './edgeless-clipboard-config';

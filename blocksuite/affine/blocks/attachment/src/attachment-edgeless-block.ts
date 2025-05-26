@@ -22,9 +22,9 @@ export class AttachmentEdgelessBlockComponent extends toGfxBlockComponent(
     return this.std.get(EdgelessLegacySlotIdentifier);
   }
 
-  override onClick(_: MouseEvent) {
+  override onClick = (_: MouseEvent) => {
     return;
-  }
+  };
 
   override renderGfxBlock() {
     const { style$ } = this.model.props;
