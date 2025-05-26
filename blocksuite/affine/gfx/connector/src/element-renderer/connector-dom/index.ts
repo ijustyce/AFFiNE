@@ -5,7 +5,7 @@ import {
   DefaultTheme,
   type PointStyle,
 } from '@blocksuite/affine-model';
-import { PointLocation } from '@blocksuite/global/gfx';
+import { PointLocation, SVGPathBuilder } from '@blocksuite/global/gfx';
 
 import { isConnectorWithLabel } from '../../connector-manager.js';
 import { DEFAULT_ARROW_SIZE } from '../utils.js';
@@ -15,60 +15,6 @@ interface PathBounds {
   minY: number;
   maxX: number;
   maxY: number;
-}
-
-interface PathCommand {
-  command: string;
-  coordinates: number[];
-}
-
-class SVGPathBuilder {
-  private commands: PathCommand[] = [];
-
-  moveTo(x: number, y: number): this {
-    this.commands.push({
-      command: 'M',
-      coordinates: [x, y],
-    });
-    return this;
-  }
-
-  lineTo(x: number, y: number): this {
-    this.commands.push({
-      command: 'L',
-      coordinates: [x, y],
-    });
-    return this;
-  }
-
-  curveTo(
-    cp1x: number,
-    cp1y: number,
-    cp2x: number,
-    cp2y: number,
-    x: number,
-    y: number
-  ): this {
-    this.commands.push({
-      command: 'C',
-      coordinates: [cp1x, cp1y, cp2x, cp2y, x, y],
-    });
-    return this;
-  }
-
-  build(): string {
-    const pathSegments = this.commands.map(cmd => {
-      const coords = cmd.coordinates.join(' ');
-      return `${cmd.command} ${coords}`;
-    });
-
-    return pathSegments.join(' ');
-  }
-
-  clear(): this {
-    this.commands = [];
-    return this;
-  }
 }
 
 function calculatePathBounds(path: PointLocation[]): PathBounds {
