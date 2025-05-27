@@ -7,16 +7,18 @@ import type { InitFn } from './utils.js';
 const presetMarkdown = `Click the 🔁 button to switch between editors dynamically - they are fully compatible!`;
 
 export const preset: InitFn = async (collection: Workspace, id: string) => {
-  const doc = collection.createDoc(id).getStore({ id });
-  doc.load();
+  const doc = collection.getDoc(id) ?? collection.createDoc(id);
+
+  const store = doc.getStore({ id });
+  store.load();
   // Add root block and surface block at root level
-  const rootId = doc.addBlock('affine:page', {
+  const rootId = store.addBlock('affine:page', {
     title: new Text('BlockSuite Playground'),
   });
-  doc.addBlock('affine:surface', {}, rootId);
+  store.addBlock('affine:surface', {}, rootId);
 
   // Add note block inside root block
-  const noteId = doc.addBlock(
+  const noteId = store.addBlock(
     'affine:note',
     { xywh: '[0, 100, 800, 640]' },
     rootId
@@ -24,13 +26,13 @@ export const preset: InitFn = async (collection: Workspace, id: string) => {
 
   // Import preset markdown content inside note block
   await MarkdownTransformer.importMarkdownToBlock({
-    doc,
+    doc: store,
     blockId: noteId,
     markdown: presetMarkdown,
     extensions: getTestStoreManager().get('store'),
   });
 
-  doc.resetHistory();
+  store.resetHistory();
 };
 
 preset.id = 'preset';
