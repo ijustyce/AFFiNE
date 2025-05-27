@@ -10,7 +10,7 @@ import {
 import type { Request, Response } from 'express';
 import { HTMLRewriter } from 'htmlrewriter';
 
-import { BadRequest, Cache, URLHelper, UseNamedGuard } from '../../base';
+import { BadRequest, Cache, Due, URLHelper, UseNamedGuard } from '../../base';
 import { Public } from '../../core/auth';
 import { WorkerService } from './service';
 import type { LinkPreviewRequest, LinkPreviewResponse } from './types';
@@ -27,7 +27,7 @@ import {
 import { decodeWithCharset } from './utils/encoding';
 
 // cache for 30 minutes
-const CACHE_TTL = 1000 * 60 * 30;
+const CACHE_TTL = Due.ms('30m');
 
 @Public()
 @UseNamedGuard('selfhost')

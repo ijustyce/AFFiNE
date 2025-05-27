@@ -8,7 +8,7 @@ import {
   createTestingModule,
   type TestingModule,
 } from '../../../__tests__/utils';
-import { NotificationNotFound } from '../../../base';
+import { Due, NotificationNotFound } from '../../../base';
 import {
   DocMode,
   MentionNotificationBody,
@@ -381,7 +381,7 @@ test('should clean expired notifications', async t => {
   // wait for 100 days
   mock.timers.enable({
     apis: ['Date'],
-    now: Date.now() + 1000 * 60 * 60 * 24 * 100,
+    now: Due.after('100d'),
   });
   await t.context.models.notification.cleanExpiredNotifications();
   count = await notificationService.countByUserId(member.id);
@@ -390,7 +390,7 @@ test('should clean expired notifications', async t => {
   // wait for 1 year
   mock.timers.enable({
     apis: ['Date'],
-    now: Date.now() + 1000 * 60 * 60 * 24 * 365,
+    now: Due.after('1y'),
   });
   await t.context.models.notification.cleanExpiredNotifications();
   count = await notificationService.countByUserId(member.id);

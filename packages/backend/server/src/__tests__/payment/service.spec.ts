@@ -6,7 +6,7 @@ import Sinon from 'sinon';
 import Stripe from 'stripe';
 
 import { AppModule } from '../../app.module';
-import { EventBus } from '../../base';
+import { Due, EventBus } from '../../base';
 import { ConfigFactory, ConfigModule } from '../../base/config';
 import { CurrentUser } from '../../core/auth';
 import { AuthService } from '../../core/auth/service';
@@ -129,8 +129,8 @@ const sub: Stripe.Subscription = {
   object: 'subscription',
   cancel_at_period_end: false,
   canceled_at: null,
-  current_period_end: unixNow() + 60 * 60 * 24 * 30,
-  current_period_start: unixNow() - 60 * 60 * 24 * 1,
+  current_period_end: Due.after('30d').getTime() / 1000,
+  current_period_start: Due.before('1d').getTime() / 1000,
   // @ts-expect-error stub
   customer: {
     id: 'cus_1',
@@ -914,7 +914,7 @@ const subscriptionSchedule: Stripe.SubscriptionSchedule = {
         },
       ],
       start_date: unixNow(),
-      end_date: unixNow() + 30 * 24 * 60 * 60,
+      end_date: Due.after('30d').getTime() / 1000,
     },
     {
       items: [
@@ -924,7 +924,7 @@ const subscriptionSchedule: Stripe.SubscriptionSchedule = {
           quantity: 1,
         },
       ],
-      start_date: unixNow() + 30 * 24 * 60 * 60,
+      start_date: Due.after('30d').getTime() / 1000,
     },
   ],
 };
@@ -1550,10 +1550,7 @@ test('should be able to subscribe onetime payment subscription', async t => {
   t.is(subInDB?.recurring, SubscriptionRecurring.Monthly);
   t.is(subInDB?.status, SubscriptionStatus.Active);
   t.is(subInDB?.stripeSubscriptionId, null);
-  t.is(
-    subInDB?.end?.toDateString(),
-    new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toDateString()
-  );
+  t.is(subInDB?.end?.toDateString(), Due.after('30d').toDateString());
 });
 
 test('should be able to accumulate onetime payment subscription period', async t => {
@@ -1574,7 +1571,7 @@ test('should be able to accumulate onetime payment subscription period', async t
   });
 
   // add 365 days
-  t.is(subInDB!.end!.getTime(), end.getTime() + 365 * 24 * 60 * 60 * 1000);
+  t.is(subInDB!.end!.getTime(), Due.after('1y', end).getTime());
 });
 
 test('should be able to recalculate onetime payment subscription period after expiration', async t => {
@@ -1599,10 +1596,7 @@ test('should be able to recalculate onetime payment subscription period after ex
   });
 
   // add 365 days from now
-  t.is(
-    subInDB?.end?.toDateString(),
-    new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toDateString()
-  );
+  t.is(subInDB?.end?.toDateString(), Due.after('1y').toDateString());
 });
 
 test('should not accumulate onetime payment subscription period for redeemed invoices', async t => {
@@ -1617,10 +1611,7 @@ test('should not accumulate onetime payment subscription period for redeemed inv
     where: { targetId: u1.id },
   });
 
-  t.is(
-    subInDB?.end?.toDateString(),
-    new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toDateString()
-  );
+  t.is(subInDB?.end?.toDateString(), Due.after('1y').toDateString());
 });
 
 // TEAM

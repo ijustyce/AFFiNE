@@ -5,7 +5,7 @@ import type { Request } from 'express';
 import { nanoid } from 'nanoid';
 import { z } from 'zod';
 
-import { CaptchaVerificationFailed, Config, OnEvent } from '../../base';
+import { CaptchaVerificationFailed, Config, Due, OnEvent } from '../../base';
 import { ServerFeature, ServerService } from '../../core';
 import { Models, TokenType } from '../../models';
 import { verifyChallengeResponse } from '../../native';
@@ -78,7 +78,7 @@ export class CaptchaService {
     const challenge = await this.models.verificationToken.create(
       TokenType.Challenge,
       resource,
-      5 * 60
+      Due.s('5m')
     );
 
     return {

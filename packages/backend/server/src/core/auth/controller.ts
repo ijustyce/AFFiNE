@@ -18,6 +18,7 @@ import {
   Cache,
   Config,
   CryptoHelper,
+  Due,
   EarlyAccessRequired,
   EmailTokenNotFound,
   InvalidAuthState,
@@ -199,7 +200,7 @@ export class AuthController {
       throw new WrongSignInCredentials({ email });
     }
 
-    const ttlInSec = 30 * 60;
+    const ttlInSec = Due.s('30m');
     const token = await this.models.verificationToken.create(
       TokenType.SignIn,
       email,

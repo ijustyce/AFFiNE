@@ -7,6 +7,7 @@ import { z } from 'zod';
 
 import {
   CryptoHelper,
+  Due,
   EventBus,
   InternalServerError,
   InvalidLicenseToActivate,
@@ -337,7 +338,7 @@ export class LicenseService {
     const licenses = await this.db.installedLicense.findMany({
       where: {
         validatedAt: {
-          lte: new Date(Date.now() - 1000 * 60 * 60 /* 1h */),
+          lte: Due.before('1h'),
         },
       },
     });

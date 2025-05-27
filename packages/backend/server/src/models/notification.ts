@@ -7,7 +7,7 @@ import {
 } from '@prisma/client';
 import { z } from 'zod';
 
-import { PaginationInput } from '../base';
+import { Due, PaginationInput } from '../base';
 import { BaseModel } from './base';
 import { DocMode } from './common';
 
@@ -15,8 +15,6 @@ export { NotificationLevel, NotificationType };
 export type { Notification };
 
 // #region input
-
-export const ONE_YEAR = 1000 * 60 * 60 * 24 * 365;
 const IdSchema = z.string().trim().min(1).max(100);
 
 export const BaseNotificationCreateSchema = z.object({
@@ -237,7 +235,7 @@ export class NotificationModel extends BaseModel {
   async cleanExpiredNotifications() {
     const { count } = await this.db.notification.deleteMany({
       // delete notifications that are older than one year
-      where: { createdAt: { lte: new Date(Date.now() - ONE_YEAR) } },
+      where: { createdAt: { lte: Due.before('1y') } },
     });
     if (count > 0) {
       this.logger.log(`Deleted ${count} expired notifications`);

@@ -6,6 +6,7 @@ import { type QueueOptions } from 'bullmq';
 
 import { Config } from '../../config';
 import { QueueRedis } from '../../redis';
+import { Due } from '../../utils';
 import { Queue, QUEUES } from './def';
 import { JobExecutor } from './executor';
 import { JobQueue } from './queue';
@@ -40,7 +41,7 @@ export class JobModule {
           ...QUEUES.map(name => {
             if (name === Queue.NIGHTLY_JOB) {
               // avoid nightly jobs been run multiple times
-              return { name, removeOnComplete: { age: 1000 * 60 * 60 } };
+              return { name, removeOnComplete: { age: Due.ms('1m') } };
             }
             return { name };
           })

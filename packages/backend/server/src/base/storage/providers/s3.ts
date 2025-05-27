@@ -22,7 +22,7 @@ import {
   PutObjectMetadata,
   StorageProvider,
 } from './provider';
-import { autoMetadata, SIGNED_URL_EXPIRED, toBuffer } from './utils';
+import { autoMetadata, SIGNED_URL_EXPIRED_SEC, toBuffer } from './utils';
 
 export interface S3StorageConfig extends S3ClientConfig {
   usePresignedURL?: {
@@ -138,7 +138,7 @@ export class S3StorageProvider implements StorageProvider {
               Bucket: this.bucket,
               Key: key,
             }),
-            { expiresIn: SIGNED_URL_EXPIRED }
+            { expiresIn: SIGNED_URL_EXPIRED_SEC }
           );
 
           return {

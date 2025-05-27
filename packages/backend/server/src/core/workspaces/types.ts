@@ -11,6 +11,7 @@ import {
 import { WorkspaceMemberStatus } from '@prisma/client';
 import { GraphQLJSONObject, SafeIntResolver } from 'graphql-scalars';
 
+import { Due } from '../../base';
 import { DocRole, WorkspaceRole } from '../permission';
 import { UserType, WorkspaceUserType } from '../user/types';
 
@@ -174,13 +175,11 @@ export class InviteResult {
   error?: object;
 }
 
-const Day = 24 * 60 * 60 * 1000;
-
 export enum WorkspaceInviteLinkExpireTime {
-  OneDay = Day,
-  ThreeDays = 3 * Day,
-  OneWeek = 7 * Day,
-  OneMonth = 30 * Day,
+  OneDay = Due.ms('1d'),
+  ThreeDays = Due.ms('3d'),
+  OneWeek = Due.ms('1w'),
+  OneMonth = Due.ms('1M'),
 }
 
 registerEnumType(WorkspaceInviteLinkExpireTime, {

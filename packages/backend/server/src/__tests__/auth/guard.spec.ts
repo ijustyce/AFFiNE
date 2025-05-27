@@ -4,6 +4,7 @@ import ava, { TestFn } from 'ava';
 import Sinon from 'sinon';
 import request from 'supertest';
 
+import { Due } from '../../base';
 import { AuthModule, CurrentUser, Public, Session } from '../../core/auth';
 import { AuthService } from '../../core/auth/service';
 import { Models } from '../../models';
@@ -125,7 +126,7 @@ test('should be able to refresh session if needed', async t => {
       sessionId,
     },
     data: {
-      expiresAt: new Date(Date.now() + 1000 * 60 * 60 /* expires in 1 hour */),
+      expiresAt: Due.after('1h'),
     },
   });
 

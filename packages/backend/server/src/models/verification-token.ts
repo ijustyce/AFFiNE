@@ -3,6 +3,7 @@ import { randomUUID } from 'node:crypto';
 import { Injectable } from '@nestjs/common';
 import { type VerificationToken } from '@prisma/client';
 
+import { Due } from '../base';
 import { CryptoHelper } from '../base/helpers';
 import { BaseModel } from './base';
 
@@ -28,7 +29,7 @@ export class VerificationTokenModel extends BaseModel {
   async create(
     type: TokenType,
     credential?: string,
-    ttlInSec: number = 30 * 60
+    ttlInSec: number = Due.s('30m')
   ) {
     const plaintextToken = randomUUID();
     const { token } = await this.db.verificationToken.create({
@@ -36,7 +37,7 @@ export class VerificationTokenModel extends BaseModel {
         type,
         token: plaintextToken,
         credential,
-        expiresAt: new Date(Date.now() + ttlInSec * 1000),
+        expiresAt: Due.after(ttlInSec * 1000),
       },
     });
     return this.crypto.encrypt(token);

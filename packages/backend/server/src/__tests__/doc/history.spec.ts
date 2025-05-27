@@ -3,6 +3,7 @@ import { PrismaClient } from '@prisma/client';
 import test from 'ava';
 import * as Sinon from 'sinon';
 
+import { Due } from '../../base';
 import { DocStorageModule, PgWorkspaceDocStorageAdapter } from '../../core/doc';
 import { DocStorageOptions } from '../../core/doc/options';
 import { DocRecord } from '../../core/doc/storage';
@@ -122,7 +123,7 @@ test('should create history if time diff is larger than interval config and stat
 
   // @ts-expect-error private method
   Sinon.stub(adapter, 'lastDocHistory').resolves({
-    timestamp: new Date(timestamp.getTime() - 1000 * 60 * 20),
+    timestamp: Due.before('20m', timestamp),
     state: Buffer.from([0, 1]),
   });
 

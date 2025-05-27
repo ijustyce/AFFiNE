@@ -11,6 +11,7 @@ import {
   Cache,
   Config,
   CryptoHelper,
+  Due,
   getOrGenRequestId,
   UserFriendlyError,
 } from '../../base';
@@ -24,7 +25,7 @@ import {
 import { PgWorkspaceDocStorageAdapter } from './adapters/workspace';
 import { type DocDiff, type DocRecord } from './storage';
 
-const DOC_CONTENT_CACHE_7_DAYS = 7 * 24 * 60 * 60 * 1000;
+const DOC_CONTENT_CACHE_TTL_MS = Due.ms('7d');
 
 export interface WorkspaceDocInfo {
   id: string;
@@ -79,7 +80,7 @@ export abstract class DocReader {
     const content = await this.getDocContentWithoutCache(workspaceId, docId);
     if (content) {
       await this.cache.set(cacheKey, content, {
-        ttl: DOC_CONTENT_CACHE_7_DAYS,
+        ttl: DOC_CONTENT_CACHE_TTL_MS,
       });
     }
     return content;

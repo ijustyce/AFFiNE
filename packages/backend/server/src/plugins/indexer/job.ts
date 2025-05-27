@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 
-import { Config, JOB_SIGNAL, JobQueue, OnJob } from '../../base';
+import { Config, Due, JOB_SIGNAL, JobQueue, OnJob } from '../../base';
 import { readAllDocIdsFromWorkspaceSnapshot } from '../../core/utils/blocksuite';
 import { Models } from '../../models';
 import { IndexerService } from './service';
@@ -182,8 +182,7 @@ export class IndexerJob {
       // ignore 180 days not updated workspaces
       if (
         !snapshotMeta?.updatedAt ||
-        Date.now() - snapshotMeta.updatedAt.getTime() >
-          180 * 24 * 60 * 60 * 1000
+        snapshotMeta.updatedAt < Due.before('180d')
       ) {
         continue;
       }

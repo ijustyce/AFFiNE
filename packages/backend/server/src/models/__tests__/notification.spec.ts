@@ -4,6 +4,7 @@ import { mock } from 'node:test';
 import ava, { TestFn } from 'ava';
 
 import { createTestingModule, type TestingModule } from '../../__tests__/utils';
+import { Due } from '../../base';
 import { Config } from '../../base/config';
 import {
   DocMode,
@@ -259,7 +260,7 @@ test('should clean expired notifications', async t => {
   // wait for 1 year
   mock.timers.enable({
     apis: ['Date'],
-    now: Date.now() + 1000 * 60 * 60 * 24 * 365,
+    now: Due.after('1y'),
   });
   count = await t.context.models.notification.cleanExpiredNotifications();
   t.is(count, 1);

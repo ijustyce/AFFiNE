@@ -4,6 +4,7 @@ import { crc32 } from '@node-rs/crc32';
 import { getStreamAsBuffer } from 'get-stream';
 
 import { getMime } from '../../../native';
+import { Due } from '../../utils';
 import { BlobInputType, PutObjectMetadata } from './provider';
 
 export async function toBuffer(input: BlobInputType): Promise<Buffer> {
@@ -43,4 +44,4 @@ export function autoMetadata(
   return metadata;
 }
 
-export const SIGNED_URL_EXPIRED = 60 * 60; // 1 hour
+export const SIGNED_URL_EXPIRED_SEC = Due.s('1h');

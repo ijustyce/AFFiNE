@@ -4,8 +4,8 @@ import { defineModuleConfig } from '../../base';
 
 export interface AuthConfig {
   session: {
-    ttl: number;
-    ttr: number;
+    ttl: string;
+    ttr: string;
   };
   allowSignup: boolean;
   requireEmailDomainVerification: boolean;
@@ -60,10 +60,10 @@ defineModuleConfig('auth', {
   },
   'session.ttl': {
     desc: 'Application auth expiration time in seconds.',
-    default: 60 * 60 * 24 * 15, // 15 days
+    default: '15d',
   },
   'session.ttr': {
     desc: 'Application auth time to refresh in seconds.',
-    default: 60 * 60 * 24 * 7, // 7 days
+    default: '7d',
   },
 });
