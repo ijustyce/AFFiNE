@@ -14,6 +14,7 @@ export declare class ApplicationListChangedSubscriber {
 }
 
 export declare class ApplicationStateChangedSubscriber {
+  get processId(): number
   unsubscribe(): void
 }
 
@@ -62,6 +63,10 @@ export declare class DocStoragePool {
   clearClocks(universalId: string): Promise<void>
   setBlobUploadedAt(universalId: string, peer: string, blobId: string, uploadedAt?: Date | undefined | null): Promise<void>
   getBlobUploadedAt(universalId: string, peer: string, blobId: string): Promise<Date | null>
+}
+
+export declare class MicrophoneListener {
+  constructor(callback: ((err: Error | null, arg0: boolean, arg1: string, arg2: string, arg3: string) => any))
 }
 
 export declare class RecordingPermissions {
@@ -118,8 +123,8 @@ export declare class SqliteConnection {
 }
 
 export declare class TappableApplication {
-  constructor(objectId: AudioObjectID)
-  static fromApplication(app: Application, objectId: AudioObjectID): TappableApplication
+  constructor(objectId: number)
+  static fromApplication(app: Application, objectId: number): TappableApplication
   get processId(): number
   get processGroupId(): number
   get bundleIdentifier(): string
@@ -128,6 +133,22 @@ export declare class TappableApplication {
   get icon(): Buffer
   get isRunning(): boolean
   tapAudio(audioStreamCallback: ((err: Error | null, arg: Float32Array) => void)): AudioCaptureSession
+}
+
+export interface AudioDevice {
+  deviceId: string
+  deviceName: string
+  isDefaultCommunications: boolean
+  isDefaultConsole: boolean
+  hasActiveSessions: boolean
+}
+
+export interface AudioProcess {
+  processName: string
+  processId: number
+  deviceId: string
+  deviceName: string
+  isRunning: boolean
 }
 
 export interface Blob {
@@ -143,6 +164,8 @@ export interface BlobRow {
   data: Buffer
   timestamp: Date
 }
+
+export declare function debugIsProcessActivelyUsingMicrophone(pid: number): NapiResult<string>
 
 export declare function decodeAudio(buf: Uint8Array, destSampleRate?: number | undefined | null, filename?: string | undefined | null, signal?: AbortSignal | undefined | null): Promise<Float32Array>
 
@@ -171,17 +194,16 @@ export interface DocUpdate {
   bin: Uint8Array
 }
 
+export declare function getActiveAudioProcesses(): NapiResult<Array<AudioProcess>>
+
 export interface InsertRow {
   docId?: string
   data: Uint8Array
 }
 
-export interface ListedBlob {
-  key: string
-  size: number
-  mime: string
-  createdAt: Date
-}
+export declare function listAudioDevices(): NapiResult<Array<AudioDevice>>
+
+export declare function listAudioProcesses(): NapiResult<Array<AudioProcess>>
 
 export declare function mintChallengeResponse(resource: string, bits?: number | undefined | null): Promise<string>
 

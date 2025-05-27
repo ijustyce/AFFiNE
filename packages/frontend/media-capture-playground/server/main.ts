@@ -151,6 +151,37 @@ const upload = multer({
   },
 });
 
+// Helper functions to safely access properties from both TappableApplication and Application
+function getAppName(app: TappableApplication | Application | null): string {
+  if (!app) return 'Unknown App';
+  return (app as any).name ?? 'Unknown App';
+}
+
+function getAppProcessId(
+  app: TappableApplication | Application | null
+): number {
+  if (!app) return 0;
+  return (app as any).processId ?? 0;
+}
+
+function getAppBundleIdentifier(
+  app: TappableApplication | Application | null
+): string {
+  if (!app) return 'unknown';
+  return (app as any).bundleIdentifier ?? 'unknown';
+}
+
+function getAppIcon(
+  app: TappableApplication | Application | null
+): Buffer | null {
+  if (!app) return null;
+  try {
+    return (app as any).icon ?? null;
+  } catch {
+    return null;
+  }
+}
+
 // Recording management
 async function saveRecording(
   recording: Recording,
@@ -176,9 +207,9 @@ async function saveRecording(
     if (recording.isGlobal) {
       console.log('💾 Saving global recording:');
     } else {
-      const appName = app?.name ?? 'Unknown App';
-      const processId = app?.processId ?? 0;
-      const bundleId = app?.bundleIdentifier ?? 'unknown';
+      const appName = getAppName(app);
+      const processId = getAppProcessId(app);
+      const bundleId = getAppBundleIdentifier(app);
       console.log(`💾 Saving recording for ${appName}:`);
       if (app) {
         console.log(`- Process ID: ${processId}`);
@@ -208,7 +239,7 @@ async function saveRecording(
     const timestamp = Date.now();
     const baseFilename = recording.isGlobal
       ? `global-recording-${timestamp}`
-      : `${app?.bundleIdentifier ?? 'unknown'}-${app?.processId ?? 0}-${timestamp}`;
+      : `${getAppBundleIdentifier(app)}-${getAppProcessId(app)}-${timestamp}`;
 
     // Sanitize the baseFilename to prevent path traversal
     const sanitizedFilename = baseFilename
@@ -249,18 +280,19 @@ async function saveRecording(
     console.log('✅ Transcription Wav file written successfully');
 
     // Save app icon if available
-    if (app?.icon) {
+    const appIcon = getAppIcon(app);
+    if (appIcon) {
       console.log(`📝 Writing app icon to ${iconFilename}`);
-      await fs.writeFile(iconFilename, app.icon);
+      await fs.writeFile(iconFilename, appIcon);
       console.log('✅ App icon written successfully');
     }
 
     console.log(`📝 Writing metadata to ${metadataFilename}`);
     // Save metadata with the actual sample rate from the stream
     const metadata: RecordingMetadata = {
-      appName: app?.name ?? 'Global Recording',
-      bundleIdentifier: app?.bundleIdentifier ?? 'system.global',
-      processId: app?.processId ?? -1,
+      appName: getAppName(app),
+      bundleIdentifier: getAppBundleIdentifier(app),
+      processId: getAppProcessId(app),
       recordingStartTime: recording.startTime,
       recordingEndTime,
       recordingDuration,
@@ -283,8 +315,8 @@ async function saveRecording(
 function getRecordingStatus(): RecordingStatus[] {
   return Array.from(recordingMap.entries()).map(([processId, recording]) => ({
     processId,
-    bundleIdentifier: recording.app?.bundleIdentifier ?? 'system.global',
-    name: recording.app?.name ?? 'Global Recording',
+    bundleIdentifier: getAppBundleIdentifier(recording.app),
+    name: getAppName(recording.app),
     startTime: recording.startTime,
     duration: Date.now() - recording.startTime,
   }));
@@ -295,40 +327,83 @@ function emitRecordingStatus() {
 }
 
 async function startRecording(app: TappableApplication) {
-  if (recordingMap.has(app.processId)) {
+  const appProcessId = getAppProcessId(app);
+  const appName = getAppName(app);
+  const appBundleId = getAppBundleIdentifier(app);
+
+  if (recordingMap.has(appProcessId)) {
     console.log(
-      `⚠️ Recording already in progress for ${app.name} (PID: ${app.processId})`
+      `⚠️ Recording already in progress for ${appName} (PID: ${appProcessId})`
     );
     return;
   }
 
   try {
-    const processGroupId = app.processGroupId;
-    const rootApp =
-      shareableContent.applicationWithProcessId(processGroupId) ||
-      shareableContent.applicationWithProcessId(app.processId);
+    console.log(
+      `🎙️ Starting recording for ${appName} (Bundle: ${appBundleId}, PID: ${appProcessId})`
+    );
+
+    // Find the best app to record from the same bundle group
+    let rootApp: Application | null = null;
+
+    // Get all apps with the same bundle identifier
+    const allApps = shareableContent.applications();
+    const sameBundle = allApps.filter(
+      a => getAppBundleIdentifier(a) === appBundleId
+    );
+
+    if (sameBundle.length > 1) {
+      console.log(
+        `📦 Found ${sameBundle.length} apps with bundle ID: ${appBundleId}`
+      );
+
+      // Sort by running status and process ID to find the best representative
+      const sortedApps = sameBundle.sort((a, b) => {
+        // First priority: running apps
+        const aRunning = (a as any).isRunning ?? false;
+        const bRunning = (b as any).isRunning ?? false;
+        if (aRunning !== bRunning) {
+          return aRunning ? -1 : 1;
+        }
+        // Second priority: lower process ID (usually parent process)
+        return getAppProcessId(a) - getAppProcessId(b);
+      });
+
+      const bestApp = sortedApps[0];
+      console.log(
+        `📦 Selected best app for recording: ${getAppName(bestApp)} (PID: ${getAppProcessId(bestApp)})`
+      );
+
+      rootApp = shareableContent.applicationWithProcessId(
+        getAppProcessId(bestApp)
+      );
+    } else {
+      // Only one app with this bundle ID, use it directly
+      rootApp = shareableContent.applicationWithProcessId(appProcessId);
+    }
+
     if (!rootApp) {
-      console.error(`❌ App group not found for ${app.name}`);
+      console.error(`❌ App group not found for ${appName}`);
       return;
     }
 
     console.log(
-      `🎙️ Starting recording for ${rootApp.name} (PID: ${rootApp.processId})`
+      `🎙️ Recording from ${rootApp.name} (PID: ${rootApp.processId})`
     );
 
     const buffers: Float32Array[] = [];
-    const session = app.tapAudio((err, samples) => {
+    const session = (app as any).tapAudio((err: any, samples: any) => {
       if (err) {
         console.error(`❌ Audio stream error for ${rootApp.name}:`, err);
         return;
       }
-      const recording = recordingMap.get(app.processId);
+      const recording = recordingMap.get(appProcessId);
       if (recording && !recording.isWriting) {
         buffers.push(new Float32Array(samples));
       }
     });
 
-    recordingMap.set(app.processId, {
+    recordingMap.set(appProcessId, {
       app,
       appGroup: rootApp,
       buffers,
@@ -340,7 +415,7 @@ async function startRecording(app: TappableApplication) {
     console.log(`✅ Recording started successfully for ${rootApp.name}`);
     emitRecordingStatus();
   } catch (error) {
-    console.error(`❌ Error starting recording for ${app.name}:`, error);
+    console.error(`❌ Error starting recording for ${appName}:`, error);
   }
 }
 
@@ -352,9 +427,8 @@ async function stopRecording(processId: number) {
   }
 
   const app = recording.appGroup || recording.app;
-  const appName =
-    app?.name ?? (recording.isGlobal ? 'Global Recording' : 'Unknown App');
-  const appPid = app?.processId ?? processId;
+  const appName = getAppName(app);
+  const appPid = getAppProcessId(app);
 
   console.log(`⏹️ Stopping recording for ${appName} (PID: ${appPid})`);
   console.log(
@@ -532,6 +606,13 @@ async function setupRecordingsWatcher() {
 // Application management
 const shareableContent = new ShareableContent();
 
+/**
+ * Gets all applications and groups them by bundle identifier.
+ * For apps with the same bundle ID (e.g., multiple processes of the same app),
+ * only one representative is returned. The selection prioritizes:
+ * 1. Running apps over stopped apps
+ * 2. Lower process IDs (usually parent processes)
+ */
 async function getAllApps(): Promise<AppInfo[]> {
   const apps: (AppInfo | null)[] = shareableContent.applications().map(app => {
     try {
@@ -557,37 +638,73 @@ async function getAllApps(): Promise<AppInfo[]> {
     );
   });
 
+  console.log(`📱 Found ${filteredApps.length} applications before grouping`);
+
+  // Group apps by bundleIdentifier - only keep one representative per bundle ID
+  const bundleGroups = new Map<string, AppInfo[]>();
+
+  // Group all apps by their bundle identifier
   for (const app of filteredApps) {
-    if (filteredApps.some(a => a.processId === app.processGroupId)) {
-      continue;
+    const bundleId = app.bundleIdentifier;
+    if (!bundleGroups.has(bundleId)) {
+      bundleGroups.set(bundleId, []);
     }
-    const appGroup = shareableContent.applicationWithProcessId(
-      app.processGroupId
-    );
-    if (!appGroup) {
-      continue;
-    }
-    filteredApps.push({
-      processId: appGroup.processId,
-      processGroupId: appGroup.processGroupId,
-      bundleIdentifier: appGroup.bundleIdentifier,
-      name: appGroup.name,
-      isRunning: false,
-    });
+    bundleGroups.get(bundleId)!.push(app);
   }
 
-  // Stop recording if app is not listed
+  console.log(`📦 Found ${bundleGroups.size} unique bundle identifiers`);
+
+  // For each bundle group, select the best representative
+  const groupedApps: AppInfo[] = [];
+
+  for (const [bundleId, appsInGroup] of bundleGroups) {
+    if (appsInGroup.length === 1) {
+      // Only one app with this bundle ID, use it directly
+      groupedApps.push(appsInGroup[0]);
+    } else {
+      // Multiple apps with same bundle ID, choose the best representative
+      console.log(
+        `📦 Grouping ${appsInGroup.length} apps with bundle ID: ${bundleId}`
+      );
+      appsInGroup.forEach(app => {
+        console.log(
+          `   - ${app.name} (PID: ${app.processId}, Running: ${app.isRunning})`
+        );
+      });
+
+      // Prefer running apps, then apps with lower process IDs (usually parent processes)
+      const sortedApps = appsInGroup.sort((a, b) => {
+        // First priority: running apps
+        if (a.isRunning !== b.isRunning) {
+          return a.isRunning ? -1 : 1;
+        }
+        // Second priority: lower process ID (usually parent process)
+        return a.processId - b.processId;
+      });
+
+      const representative = sortedApps[0];
+      console.log(
+        `📦 Selected representative: ${representative.name} (PID: ${representative.processId})`
+      );
+
+      groupedApps.push(representative);
+    }
+  }
+
+  console.log(`📱 Returning ${groupedApps.length} grouped applications`);
+
+  // Stop recording if app is not listed (check by process ID)
   await Promise.all(
     Array.from(recordingMap.keys()).map(async processId => {
-      if (!filteredApps.some(a => a.processId === processId)) {
+      if (!groupedApps.some(a => a.processId === processId)) {
         await stopRecording(processId);
       }
     })
   );
 
-  listenToAppStateChanges(filteredApps);
+  listenToAppStateChanges(groupedApps);
 
-  return filteredApps;
+  return groupedApps;
 }
 
 function listenToAppStateChanges(apps: AppInfo[]) {
@@ -597,19 +714,24 @@ function listenToAppStateChanges(apps: AppInfo[]) {
         return { unsubscribe: () => {} };
       }
 
+      const appName = getAppName(app);
+      const appProcessId = getAppProcessId(app);
+      const appIsRunning = (app as any).isRunning ?? false;
+
       const onAppStateChanged = () => {
+        const currentIsRunning = (app as any).isRunning ?? false;
         console.log(
-          `🔄 Application state changed: ${app.name} (PID: ${app.processId}) is now ${
-            app.isRunning ? '▶️ running' : '⏹️ stopped'
+          `🔄 Application state changed: ${appName} (PID: ${appProcessId}) is now ${
+            currentIsRunning ? '▶️ running' : '⏹️ stopped'
           }`
         );
         io.emit('apps:state-changed', {
-          processId: app.processId,
-          isRunning: app.isRunning,
+          processId: appProcessId,
+          isRunning: currentIsRunning,
         });
 
-        if (!app.isRunning) {
-          stopRecording(app.processId).catch(error => {
+        if (!currentIsRunning) {
+          stopRecording(appProcessId).catch(error => {
             console.error('❌ Error stopping recording:', error);
           });
         }
@@ -621,7 +743,7 @@ function listenToAppStateChanges(apps: AppInfo[]) {
       );
     } catch (error) {
       console.error(
-        `Failed to listen to app state changes for ${app?.name}:`,
+        `Failed to listen to app state changes for ${app ? getAppName(app) : 'unknown app'}:`,
         error
       );
       return { unsubscribe: () => {} };
@@ -652,7 +774,7 @@ io.on('connection', async socket => {
   console.log(`📤 Sending ${files.length} saved recordings to new client`);
   socket.emit('apps:saved', { recordings: files });
 
-  listenToAppStateChanges(initialApps.map(app => app.app).filter(app => !!app));
+  listenToAppStateChanges(initialApps.filter(appInfo => appInfo.app != null));
 
   socket.on('disconnect', () => {
     console.log('🔌 Client disconnected');
