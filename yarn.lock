@@ -3202,6 +3202,7 @@ __metadata:
     "@blocksuite/store": "workspace:*"
     "@lit/context": "npm:^1.1.2"
     "@preact/signals-core": "npm:^1.8.0"
+    "@svgdotjs/svg.js": "npm:^3.2.4"
     "@toeverything/theme": "npm:^1.1.14"
     "@types/lodash-es": "npm:^4.17.12"
     lit: "npm:^3.2.0"
@@ -3231,6 +3232,7 @@ __metadata:
     "@blocksuite/store": "workspace:*"
     "@lit/context": "npm:^1.1.2"
     "@preact/signals-core": "npm:^1.8.0"
+    "@svgdotjs/svg.js": "npm:^3.2.4"
     "@toeverything/theme": "npm:^1.1.14"
     "@types/lodash-es": "npm:^4.17.12"
     lit: "npm:^3.2.0"
@@ -3415,6 +3417,7 @@ __metadata:
     "@blocksuite/store": "workspace:*"
     "@lit/context": "npm:^1.1.2"
     "@preact/signals-core": "npm:^1.8.0"
+    "@svgdotjs/svg.js": "npm:^3.2.4"
     "@toeverything/theme": "npm:^1.1.14"
     "@types/lodash-es": "npm:^4.17.12"
     lit: "npm:^3.2.0"
@@ -14188,6 +14191,13 @@ __metadata:
   peerDependencies:
     storybook: ^8.2.0 || ^8.3.0-0 || ^8.4.0-0 || ^8.5.0-0 || ^8.6.0-0
   checksum: 10/6936ea3348968fe598ad47421c11a78c6ee2ce62336ea1ce9cb8257e9faa2553d3ac3e443f8a36d35a41b0d60eb169231516649c710582ec68fdead4f23ffc0e
+  languageName: node
+  linkType: hard
+
+"@svgdotjs/svg.js@npm:^3.2.4":
+  version: 3.2.4
+  resolution: "@svgdotjs/svg.js@npm:3.2.4"
+  checksum: 10/94f64d989286db1587773973b5fbbd6b0ffb05af704ee1a9000b6d250fe2c41e28b0baee4d379fb88fcc2e52a0a2e2dba247dcd0cb34e65040423edcf488e9dc
   languageName: node
   linkType: hard
 
