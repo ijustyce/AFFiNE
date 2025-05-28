@@ -278,7 +278,7 @@ const actions = [
     messages: [
       {
         role: 'user' as const,
-        content: 'what is ssot',
+        content: 'what is AFFiNE AI?',
         params: {
           files: [
             {

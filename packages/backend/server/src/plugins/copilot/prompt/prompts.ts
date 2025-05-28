@@ -1558,7 +1558,7 @@ const imageActions: Prompt[] = [
 ];
 
 const CHAT_PROMPT: Omit<Prompt, 'name'> = {
-  model: 'gpt-4.1',
+  model: 'claude-sonnet-4@20250514',
   optionalModels: [
     'gpt-4.1',
     'o3',

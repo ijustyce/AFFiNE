@@ -910,7 +910,7 @@ __metadata:
     "@affine/server-native": "workspace:*"
     "@ai-sdk/anthropic": "npm:^1.2.10"
     "@ai-sdk/google": "npm:^1.2.18"
-    "@ai-sdk/google-vertex": "npm:^2.2.22"
+    "@ai-sdk/google-vertex": "npm:^2.2.23"
     "@ai-sdk/openai": "npm:^1.3.21"
     "@ai-sdk/perplexity": "npm:^1.1.6"
     "@apollo/server": "npm:^4.11.3"
@@ -1075,7 +1075,19 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@ai-sdk/anthropic@npm:1.2.11, @ai-sdk/anthropic@npm:^1.2.10":
+"@ai-sdk/anthropic@npm:1.2.12":
+  version: 1.2.12
+  resolution: "@ai-sdk/anthropic@npm:1.2.12"
+  dependencies:
+    "@ai-sdk/provider": "npm:1.1.3"
+    "@ai-sdk/provider-utils": "npm:2.2.8"
+  peerDependencies:
+    zod: ^3.0.0
+  checksum: 10/ee09f00328c88954fba8d00795f6c379091f95b7717bb90292acf32f41b072b2c89b178c1c18dfc23fcec7532e04fcd13233b9a813ce4881e0a16cae20a878c8
+  languageName: node
+  linkType: hard
+
+"@ai-sdk/anthropic@npm:^1.2.10":
   version: 1.2.11
   resolution: "@ai-sdk/anthropic@npm:1.2.11"
   dependencies:
@@ -1087,18 +1099,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ai-sdk/google-vertex@npm:^2.2.22":
-  version: 2.2.22
-  resolution: "@ai-sdk/google-vertex@npm:2.2.22"
+"@ai-sdk/google-vertex@npm:^2.2.23":
+  version: 2.2.23
+  resolution: "@ai-sdk/google-vertex@npm:2.2.23"
   dependencies:
-    "@ai-sdk/anthropic": "npm:1.2.11"
+    "@ai-sdk/anthropic": "npm:1.2.12"
     "@ai-sdk/google": "npm:1.2.18"
     "@ai-sdk/provider": "npm:1.1.3"
     "@ai-sdk/provider-utils": "npm:2.2.8"
     google-auth-library: "npm:^9.15.0"
   peerDependencies:
     zod: ^3.0.0
-  checksum: 10/852928d35797cc14802d8c4a7dba2794197f019507a24124e7f87e456ba19f2b4e50438af626dd30e3a2a0f9f10819d6534a31e23c08f7f3d148d56b68167d0a
+  checksum: 10/19b7120879662e3597e95b84d30a587ada24d5fbd4306e4551f88605ae4e7c9d3f52bc60b6ea3bfbfc487a58c0a0ad35d1e058f7408140ea84e2ff86e6a1d052
   languageName: node
   linkType: hard
 
