@@ -66,7 +66,7 @@ export class CopilotContextDocJob {
     return this.client as EmbeddingClient;
   }
 
-  @CallMetric('ai', 'add_embedding_file_queue')
+  @CallMetric('ai', 'addFileEmbeddingQueue')
   async addFileEmbeddingQueue(file: Jobs['copilot.embedding.files']) {
     if (!this.supportEmbedding) return;
 
@@ -82,7 +82,6 @@ export class CopilotContextDocJob {
   }
 
   @OnEvent('workspace.doc.embedding')
-  @CallMetric('ai', 'add_embedding_doc_queue')
   async addDocEmbeddingQueue(
     docs: Events['workspace.doc.embedding'],
     options?: { contextId: string; priority: number }
@@ -183,7 +182,7 @@ export class CopilotContextDocJob {
     );
   }
 
-  async readCopilotBlob(
+  private async readCopilotBlob(
     userId: string,
     workspaceId: string,
     blobId: string,
@@ -196,7 +195,6 @@ export class CopilotContextDocJob {
   }
 
   @OnJob('copilot.embedding.files')
-  @CallMetric('ai', 'embedding_file')
   async embedPendingFile({
     userId,
     workspaceId,
@@ -319,7 +317,6 @@ export class CopilotContextDocJob {
   }
 
   @OnJob('copilot.embedding.docs')
-  @CallMetric('ai', 'embedding_doc')
   async embedPendingDocs({
     contextId,
     workspaceId,
