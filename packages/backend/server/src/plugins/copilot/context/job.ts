@@ -376,6 +376,9 @@ export class CopilotContextDocJob {
         error instanceof CopilotContextFileNotSupported &&
         error.message.includes('no content found')
       ) {
+        this.logger.warn(
+          `Doc ${docId} in workspace ${workspaceId} has no content, fulfilling empty embedding.`
+        );
         // if the doc is empty, we still need to fulfill the embedding
         await this.fulfillEmptyEmbedding(workspaceId, docId);
         return;
