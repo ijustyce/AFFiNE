@@ -32,12 +32,12 @@ chrono                 = "0.4"
 clap                   = { version = "4.4", features = ["derive"] }
 core-foundation        = "0.10"
 coreaudio-rs           = "0.12"
-criterion              = { version = "0.5", features = ["html_reports"] }
+criterion              = { version = "0.6", features = ["html_reports"] }
 criterion2             = { version = "3", default-features = false }
 dispatch2              = "0.3"
 docx-parser            = { git = "https://github.com/toeverything/docx-parser" }
 dotenvy                = "0.15"
-file-format            = { version = "0.26", features = ["reader"] }
+file-format            = { version = "0.27", features = ["reader"] }
 homedir                = "0.3"
 infer                  = { version = "0.19.0" }
 lasso                  = { version = "0.7", features = ["multi-threaded"] }
@@ -77,12 +77,12 @@ smol_str               = "0.3"
 sqlx                   = { version = "0.8", default-features = false, features = ["chrono", "macros", "migrate", "runtime-tokio", "sqlite", "tls-rustls"] }
 strum_macros           = "0.27.0"
 symphonia              = { version = "0.5", features = ["all", "opt-simd"] }
-text-splitter          = "0.25"
+text-splitter          = "0.27"
 thiserror              = "2"
-tiktoken-rs            = "0.6"
+tiktoken-rs            = "0.7"
 tokio                  = "1.37"
 tree-sitter            = { version = "0.25" }
-tree-sitter-c          = { version = "0.23" }
+tree-sitter-c          = { version = "0.24" }
 tree-sitter-c-sharp    = { version = "0.23" }
 tree-sitter-cpp        = { version = "0.23" }
 tree-sitter-go         = { version = "0.23" }
