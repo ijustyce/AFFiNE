@@ -86,9 +86,16 @@ export class PlaygroundContent extends SignalWatcher(
   @state()
   accessor sessions: CopilotSessionType[] = [];
 
+  @state()
+  accessor sharedInputValue: string = '';
+
   private rootSessionId: string | undefined = undefined;
 
-  private readonly _getSessions = async () => {
+  private isUpdatingTextareas = false;
+
+  private isSending = false;
+
+  private readonly getSessions = async () => {
     const sessions =
       (await AIProvider.session?.getSessions(
         this.doc.workspace.id,
@@ -107,7 +114,7 @@ export class PlaygroundContent extends SignalWatcher(
       });
       if (rootSessionId) {
         this.rootSessionId = rootSessionId;
-        const forkSession = await this._forkSession(rootSessionId);
+        const forkSession = await this.forkSession(rootSessionId);
         if (forkSession) {
           this.sessions = [forkSession];
         }
@@ -120,7 +127,7 @@ export class PlaygroundContent extends SignalWatcher(
       if (childSessions.length > 0) {
         this.sessions = childSessions;
       } else {
-        const forkSession = await this._forkSession(rootSession.id);
+        const forkSession = await this.forkSession(rootSession.id);
         if (forkSession) {
           this.sessions = [forkSession];
         }
@@ -128,7 +135,7 @@ export class PlaygroundContent extends SignalWatcher(
     }
   };
 
-  private readonly _forkSession = async (parentSessionId: string) => {
+  private readonly forkSession = async (parentSessionId: string) => {
     const forkSessionId = await AIProvider.forkChat?.({
       workspaceId: this.doc.workspace.id,
       docId: this.doc.id,
@@ -144,19 +151,171 @@ export class PlaygroundContent extends SignalWatcher(
     );
   };
 
-  private readonly _addChat = async () => {
+  private readonly addChat = async () => {
     if (!this.rootSessionId) {
       return;
     }
-    const forkSession = await this._forkSession(this.rootSessionId);
+    const forkSession = await this.forkSession(this.rootSessionId);
     if (forkSession) {
       this.sessions = [...this.sessions, forkSession];
     }
   };
 
+  private setupTextareaSync() {
+    const observer = new MutationObserver(() => {
+      this.syncAllTextareas();
+      this.syncAllSendButtons();
+    });
+    observer.observe(this, {
+      childList: true,
+      subtree: true,
+    });
+    this._disposables.add(() => observer.disconnect());
+    this.syncAllTextareas();
+    this.syncAllSendButtons();
+  }
+
+  private syncAllTextareas() {
+    const textareas = this.getAllTextareas();
+    textareas.forEach(textarea => {
+      this.setupTextareaListeners(textarea);
+    });
+  }
+
+  private getAllTextareas(): HTMLTextAreaElement[] {
+    return Array.from(
+      this.querySelectorAll(
+        'ai-chat-input textarea[data-testid="chat-panel-input"]'
+      )
+    ) as HTMLTextAreaElement[];
+  }
+
+  private setupTextareaListeners(textarea: HTMLTextAreaElement) {
+    if (textarea.dataset.synced) return;
+
+    textarea.dataset.synced = 'true';
+
+    const handleInput = (event: Event) => {
+      if (this.isUpdatingTextareas) return;
+
+      const target = event.target as HTMLTextAreaElement;
+      const newValue = target.value;
+
+      if (newValue !== this.sharedInputValue) {
+        this.sharedInputValue = newValue;
+        this.updateOtherTextareas(target, newValue);
+      }
+    };
+
+    // paste need delay to ensure the content is fully processed
+    const handlePaste = (event: ClipboardEvent) => {
+      if (this.isUpdatingTextareas) return;
+
+      const target = event.target as HTMLTextAreaElement;
+      setTimeout(() => {
+        const newValue = target.value;
+        if (newValue !== this.sharedInputValue) {
+          this.sharedInputValue = newValue;
+          this.updateOtherTextareas(target, newValue);
+        }
+      }, 0);
+    };
+
+    textarea.addEventListener('input', handleInput);
+    textarea.addEventListener('paste', handlePaste);
+
+    this._disposables.add(() => {
+      textarea.removeEventListener('input', handleInput);
+      textarea.removeEventListener('paste', handlePaste);
+    });
+  }
+
+  private updateOtherTextareas(
+    sourceTextarea: HTMLTextAreaElement,
+    newValue: string
+  ) {
+    this.isUpdatingTextareas = true;
+
+    const textareas = this.getAllTextareas();
+    textareas.forEach(textarea => {
+      if (textarea !== sourceTextarea && textarea.value !== newValue) {
+        textarea.value = newValue;
+        this.triggerInputEvent(textarea);
+      }
+    });
+
+    this.isUpdatingTextareas = false;
+  }
+
+  private triggerInputEvent(textarea: HTMLTextAreaElement) {
+    const inputEvent = new Event('input', { bubbles: true });
+    textarea.dispatchEvent(inputEvent);
+  }
+
+  private syncAllSendButtons() {
+    const sendButtons = this.getAllSendButtons();
+    sendButtons.forEach(button => {
+      this.setupSendButtonListener(button);
+    });
+  }
+
+  private getAllSendButtons(): HTMLElement[] {
+    return Array.from(
+      this.querySelectorAll('[data-testid="chat-panel-send"]')
+    ) as HTMLElement[];
+  }
+
+  private setupSendButtonListener(button: HTMLElement) {
+    if (button.dataset.syncSetup) return;
+
+    button.dataset.syncSetup = 'true';
+
+    const handleSendClick = async (_event: MouseEvent) => {
+      if (this.isSending) {
+        return;
+      }
+      this.isSending = true;
+      try {
+        await this.triggerOtherSendButtons(button);
+      } finally {
+        this.isSending = false;
+      }
+    };
+
+    button.addEventListener('click', handleSendClick);
+
+    this._disposables.add(() => {
+      button.removeEventListener('click', handleSendClick);
+    });
+  }
+
+  private async triggerOtherSendButtons(sourceButton: HTMLElement) {
+    const allSendButtons = this.getAllSendButtons();
+    const otherButtons = allSendButtons.filter(
+      button => button !== sourceButton
+    );
+
+    const clickPromises = otherButtons.map(async button => {
+      try {
+        const clickEvent = new MouseEvent('click', {
+          bubbles: true,
+          cancelable: true,
+          view: window,
+        });
+
+        button.dispatchEvent(clickEvent);
+      } catch (error) {
+        console.error(error);
+      }
+    });
+
+    await Promise.allSettled(clickPromises);
+  }
+
   override connectedCallback() {
     super.connectedCallback();
-    this._getSessions().catch(console.error);
+    this.getSessions().catch(console.error);
+    this.setupTextareaSync();
   }
 
   override render() {
@@ -179,7 +338,7 @@ export class PlaygroundContent extends SignalWatcher(
                 .extensions=${this.extensions}
                 .affineFeatureFlagService=${this.affineFeatureFlagService}
                 .session=${session}
-                .addChat=${this._addChat}
+                .addChat=${this.addChat}
               ></playground-chat>
             </div>
           `

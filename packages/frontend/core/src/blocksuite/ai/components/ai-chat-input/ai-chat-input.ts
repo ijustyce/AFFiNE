@@ -5,6 +5,7 @@ import { SignalWatcher, WithDisposable } from '@blocksuite/affine/global/lit';
 import { unsafeCSSVar, unsafeCSSVarV2 } from '@blocksuite/affine/shared/theme';
 import { openFilesWith } from '@blocksuite/affine/shared/utils';
 import type { EditorHost } from '@blocksuite/affine/std';
+import { ShadowlessElement } from '@blocksuite/affine/std';
 import {
   CloseIcon,
   ImageIcon,
@@ -12,7 +13,7 @@ import {
   ThinkingIcon,
 } from '@blocksuite/icons/lit';
 import { type Signal, signal } from '@preact/signals-core';
-import { css, html, LitElement, nothing } from 'lit';
+import { css, html, nothing } from 'lit';
 import { property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -37,7 +38,9 @@ function getFirstTwoLines(text: string) {
   return lines.slice(0, 2);
 }
 
-export class AIChatInput extends SignalWatcher(WithDisposable(LitElement)) {
+export class AIChatInput extends SignalWatcher(
+  WithDisposable(ShadowlessElement)
+) {
   static override styles = css`
     :host {
       width: 100%;
