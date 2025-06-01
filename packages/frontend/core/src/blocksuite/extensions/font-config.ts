@@ -8,7 +8,7 @@ export function getFontConfigExtension() {
   return FontConfigExtension(
     AffineCanvasTextFonts.map(font => ({
       ...font,
-      url: cdnUrl + 'fonts/' + font.url.split('/').pop(),
+      url: 'https://cdn.kpromise.top/affine/fonts/' + font.url.split('/').pop(),
     }))
   );
 }
