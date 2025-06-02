@@ -11,6 +11,5 @@ export function Telemetry() {
     mixpanel.opt_out_tracking();
     return;
   }, [settings.enableTelemetry]);
-
   return null;
 }
