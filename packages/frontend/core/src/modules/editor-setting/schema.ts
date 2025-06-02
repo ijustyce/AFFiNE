@@ -20,7 +20,7 @@ const AffineEditorSettingSchema = z.object({
   fontFamily: z.enum(['Sans', 'Serif', 'Mono', 'Custom']).default('Sans'),
   customFontFamily: z.string().default(''),
   newDocDefaultMode: z.enum(['edgeless', 'page', 'ask']).default('page'),
-  fullWidthLayout: z.boolean().default(false),
+  fullWidthLayout: z.boolean().default(true),
   displayDocInfo: z.boolean().default(true),
   displayBiDirectionalLink: z.boolean().default(true),
   edgelessDefaultTheme: z
