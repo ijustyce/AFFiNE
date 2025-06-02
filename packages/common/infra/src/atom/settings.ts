@@ -30,9 +30,9 @@ const appSettingBaseAtom = atomWithStorage<AppSetting>(
     windowFrameStyle: 'frameless',
     enableBlurBackground: true,
     enableNoisyBackground: true,
-    autoCheckUpdate: true,
-    autoDownloadUpdate: true,
-    enableTelemetry: true,
+    autoCheckUpdate: false,
+    autoDownloadUpdate: false,
+    enableTelemetry: false,
   },
   undefined,
   {
