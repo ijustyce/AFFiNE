@@ -1,6 +1,5 @@
 import { DebugLogger } from '@affine/debug';
 import type { Dict, OverridedMixpanel } from 'mixpanel-browser';
-import mixpanelBrowser from 'mixpanel-browser';
 
 const logger = new DebugLogger('mixpanel');
 
