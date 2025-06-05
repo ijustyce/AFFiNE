@@ -17,7 +17,8 @@ export function affineTextStyles(
   let inlineCodeStyle = {};
   if (props.code) {
     inlineCodeStyle = {
-      'font-family': 'var(--affine-font-code-family)',
+      'font-family':
+        "'Cascadia Code','LXGW WenKai Screen','Source Code Pro Semibold','Microsoft YaHei'",
       background: 'var(--affine-background-code-block)',
       border: '1px solid var(--affine-border-color)',
       'border-radius': '4px',

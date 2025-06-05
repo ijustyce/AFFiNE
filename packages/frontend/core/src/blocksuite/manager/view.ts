@@ -153,7 +153,8 @@ class ViewProvider {
       },
       fontConfig: AffineCanvasTextFonts.map(font => ({
         ...font,
-        url: environment.publicPath + 'fonts/' + font.url.split('/').pop(),
+        url:
+          'https://cdn.kpromise.top/affine/fonts/' + font.url.split('/').pop(),
       })),
       peekView: !peekViewService
         ? undefined

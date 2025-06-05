@@ -4,7 +4,7 @@
 @font-face {
   font-family: 'Inter';
   font-display: swap;
-  src: url(../fonts/inter/Inter-VariableFont_slnt,wght.ttf);
+  src: url(https://cdn.kpromise.top/affine/assets/Inter-VariableFont_slnt_wght.ttf);
   font-weight: 1 999;
 }
 
@@ -15,14 +15,14 @@
   font-family: 'Source Code Pro';
   font-style: normal;
   font-display: swap;
-  src: url(../fonts/source-code-pro/SourceCodePro-VariableFont_wght.ttf);
+  src: url(https://cdn.kpromise.top/affine/assets/SourceCodePro-VariableFont_wght.ttf);
 }
 
 @font-face {
   font-family: 'Source Code Pro';
   font-style: italic;
   font-display: swap;
-  src: url(../fonts/source-code-pro/SourceCodePro-Italic-VariableFont_wght.ttf);
+  src: url(https://cdn.kpromise.top/affine/assets/SourceCodePro-Italic-VariableFont_wght.ttf);
 }
 
 /*
@@ -33,7 +33,7 @@
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: url(../fonts/kalam/Kalam-Regular.ttf);
+  src: url(https://cdn.kpromise.top/affine/assets/Kalam-Regular.ttf);
 }
 
 @font-face {
@@ -41,7 +41,7 @@
   font-style: normal;
   font-weight: 300;
   font-display: swap;
-  src: url(../fonts/kalam/Kalam-Light.ttf);
+  src: url(https://cdn.kpromise.top/affine/assets/Kalam-Light.ttf);
 }
 
 @font-face {
@@ -49,7 +49,7 @@
   font-style: normal;
   font-weight: 700;
   font-display: swap;
-  src: url(../fonts/kalam/Kalam-Bold.ttf);
+  src: url(https://cdn.kpromise.top/affine/assets/Kalam-Bold.ttf);
 }
 
 /*
@@ -60,7 +60,7 @@
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: url(../fonts/source-serif-4/SourceSerif4-Regular.ttf);
+  src: url(https://cdn.kpromise.top/affine/assets/SourceSerif4-Regular.ttf);
 }
 
 @font-face {
@@ -68,7 +68,7 @@
   font-style: italic;
   font-weight: 400;
   font-display: swap;
-  src: url(../fonts/source-serif-4/SourceSerif4-Italic.ttf);
+  src: url(https://cdn.kpromise.top/affine/assets/SourceSerif4-Italic.ttf);
 }
 
 @font-face {
@@ -76,7 +76,7 @@
   font-style: normal;
   font-weight: 500;
   font-display: swap;
-  src: url(../fonts/source-serif-4/SourceSerif4-Medium.ttf);
+  src: url(https://cdn.kpromise.top/affine/assets/SourceSerif4-Medium.ttf);
 }
 
 @font-face {
@@ -84,7 +84,7 @@
   font-style: italic;
   font-weight: 500;
   font-display: swap;
-  src: url(../fonts/source-serif-4/SourceSerif4-MediumItalic.ttf);
+  src: url(https://cdn.kpromise.top/affine/assets/SourceSerif4-MediumItalic.ttf);
 }
 
 @font-face {
@@ -92,7 +92,7 @@
   font-style: normal;
   font-weight: 600;
   font-display: swap;
-  src: url(../fonts/source-serif-4/SourceSerif4-SemiBold.ttf);
+  src: url(https://cdn.kpromise.top/affine/assets/SourceSerif4-SemiBold.ttf);
 }
 
 @font-face {
@@ -100,7 +100,7 @@
   font-style: italic;
   font-weight: 600;
   font-display: swap;
-  src: url(../fonts/source-serif-4/SourceSerif4-SemiBoldItalic.ttf);
+  src: url(https://cdn.kpromise.top/affine/assets/SourceSerif4-SemiBoldItalic.ttf);
 }
 
 @font-face {
@@ -108,7 +108,7 @@
   font-style: normal;
   font-weight: 700;
   font-display: swap;
-  src: url(../fonts/source-serif-4/SourceSerif4-Bold.ttf);
+  src: url(https://cdn.kpromise.top/affine/assets/SourceSerif4-Bold.ttf);
 }
 
 @font-face {
@@ -116,7 +116,7 @@
   font-style: italic;
   font-weight: 700;
   font-display: swap;
-  src: url(../fonts/source-serif-4/SourceSerif4-BoldItalic.ttf);
+  src: url(https://cdn.kpromise.top/affine/assets/SourceSerif4-BoldItalic.ttf);
 }
 
 /*
@@ -127,7 +127,7 @@
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: url(../fonts/space-mono/SpaceMono-Regular.ttf);
+  src: url(https://cdn.kpromise.top/affine/assets/SpaceMono-Regular.ttf);
 }
 
 @font-face {
@@ -135,7 +135,7 @@
   font-style: italic;
   font-weight: 400;
   font-display: swap;
-  src: url(../fonts/space-mono/SpaceMono-Italic.ttf);
+  src: url(https://cdn.kpromise.top/affine/assets/SpaceMono-Italic.ttf);
 }
 
 @font-face {
@@ -143,7 +143,7 @@
   font-style: normal;
   font-weight: 700;
   font-display: swap;
-  src: url(../fonts/space-mono/SpaceMono-Bold.ttf);
+  src: url(https://cdn.kpromise.top/affine/assets/SpaceMono-Bold.ttf);
 }
 
 @font-face {
@@ -151,7 +151,7 @@
   font-style: italic;
   font-weight: 700;
   font-display: swap;
-  src: url(../fonts/space-mono/SpaceMono-BoldItalic.ttf);
+  src: url(https://cdn.kpromise.top/affine/assets/SpaceMono-BoldItalic.ttf);
 }
 
 /*
@@ -162,7 +162,7 @@
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: url(../fonts/ibm-plex-mono/IBMPlexMono-Regular.ttf);
+  src: url(https://cdn.kpromise.top/affine/assets/IBMPlexMono-Regular.ttf);
 }
 
 @font-face {
@@ -170,7 +170,7 @@
   font-style: italic;
   font-weight: 400;
   font-display: swap;
-  src: url(../fonts/ibm-plex-mono/IBMPlexMono-Italic.ttf);
+  src: url(https://cdn.kpromise.top/affine/assets/IBMPlexMono-Italic.ttf);
 }
 
 @font-face {
@@ -178,7 +178,7 @@
   font-style: normal;
   font-weight: 700;
   font-display: swap;
-  src: url(../fonts/ibm-plex-mono/IBMPlexMono-Bold.ttf);
+  src: url(https://cdn.kpromise.top/affine/assets/IBMPlexMono-Bold.ttf);
 }
 
 @font-face {
@@ -186,5 +186,5 @@
   font-style: italic;
   font-weight: 700;
   font-display: swap;
-  src: url(../fonts/ibm-plex-mono/IBMPlexMono-BoldItalic.ttf);
+  src: url(https://cdn.kpromise.top/affine/assets/IBMPlexMono-BoldItalic.ttf);
 }

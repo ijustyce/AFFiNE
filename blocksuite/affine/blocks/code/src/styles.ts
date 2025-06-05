@@ -7,7 +7,7 @@ export const codeBlockStyles = css`
   }
 
   .affine-code-block-container {
-    font-size: var(--affine-font-xs);
+    tab-size: 2;
     line-height: var(--affine-line-height);
     position: relative;
     padding: 32px 20px;
@@ -23,7 +23,9 @@ export const codeBlockStyles = css`
   ${scrollbarStyle('.affine-code-block-container rich-text')}
 
   .affine-code-block-container .inline-editor {
-    font-family: var(--affine-font-code-family);
+    font-family:
+      'Cascadia Code', 'LXGW WenKai Screen', 'Source Code Pro Semibold',
+      'Microsoft YaHei';
     font-variant-ligatures: none;
   }
 
@@ -47,7 +49,6 @@ export const codeBlockStyles = css`
     left: -0.5px;
     z-index: 1;
     background: var(--affine-background-code-block);
-    font-size: var(--affine-font-xs);
     line-height: var(--affine-line-height);
     color: var(--affine-text-secondary);
     box-sizing: border-box;

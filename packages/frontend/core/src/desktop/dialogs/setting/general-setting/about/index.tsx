@@ -110,8 +110,8 @@ export const AboutAffine = () => {
           desc={t['com.affine.telemetry.enable.desc']()}
         >
           <Switch
-            checked={appSettings.enableTelemetry !== false}
-            onChange={onSwitchTelemetry}
+            checked={appSettings.enableTelemetry === true}
+            onChange={() => onSwitchTelemetry(false)}
           />
         </SettingRow>
       </SettingWrapper>

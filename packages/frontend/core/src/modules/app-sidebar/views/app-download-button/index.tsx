@@ -13,7 +13,7 @@ export function AppDownloadButton({
   className?: string;
   style?: React.CSSProperties;
 }) {
-  const [show, setShow] = useState(true);
+  const [show, setShow] = useState(false);
 
   const handleClose = useCatchEventCallback(() => {
     setShow(false);

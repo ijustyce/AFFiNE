@@ -20,7 +20,7 @@ export type LanguageInfo = {
 
 const logger = new DebugLogger('i18n');
 
-function mapLanguageInfo(language: Language = 'en'): LanguageInfo {
+function mapLanguageInfo(language: Language = 'zh-Hans'): LanguageInfo {
   const languageInfo = SUPPORTED_LANGUAGES[language];
 
   return {
@@ -60,7 +60,7 @@ export class I18n extends Entity {
   }
 
   init() {
-    this.changeLanguage(this.currentLanguageKey$.value ?? 'en');
+    this.changeLanguage(this.currentLanguageKey$.value ?? 'zh-Hans');
   }
 
   changeLanguage = effect(
