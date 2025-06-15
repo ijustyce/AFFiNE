@@ -3,8 +3,8 @@ import { getBuildConfig } from '@affine-tools/utils/build-config';
 import { Package } from '@affine-tools/utils/workspace';
 
 globalThis.BUILD_CONFIG = getBuildConfig(new Package('@affine/web'), {
-  mode: 'development',
-  channel: 'canary',
+  mode: 'production',
+  channel: 'stable',
 });
 
 if (typeof window !== 'undefined') {

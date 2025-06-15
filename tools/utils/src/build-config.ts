@@ -20,7 +20,7 @@ export function getBuildConfig(
   const buildPreset: Record<BuildFlags['channel'], BUILD_CONFIG_TYPE> = {
     get stable() {
       return {
-        debug: buildFlags.mode === 'development',
+        debug: false,
         distribution,
         isDesktopEdition: (
           ['web', 'desktop', 'admin'] as BUILD_CONFIG_TYPE['distribution'][]
