@@ -98,6 +98,9 @@ export class EditorUtils {
       const responsesMenu = answer.getByTestId('answer-responses');
       await responsesMenu.isVisible();
       await responsesMenu.scrollIntoViewIfNeeded({ timeout: 60000 });
+      await responsesMenu
+        .getByTestId('answer-insert-below-loading')
+        .waitFor({ state: 'hidden' });
 
       if (await responsesMenu.getByTestId('answer-insert-below').isVisible()) {
         responses.add('insert-below');
@@ -551,9 +554,11 @@ export class EditorUtils {
       explainImage: this.createAction(page, () =>
         page.getByTestId('action-explain-image').click()
       ),
-      generateImage: this.createAction(page, () =>
-        page.getByTestId('action-generate-image').click()
-      ),
+      generateImage: this.createAction(page, async () => {
+        await page.getByTestId('action-generate-image').click();
+        await page.keyboard.type('generate an image');
+        await page.getByTestId('ai-panel-input-send').click();
+      }),
       generateCaption: this.createAction(page, () =>
         page.getByTestId('action-generate-caption').click()
       ),
