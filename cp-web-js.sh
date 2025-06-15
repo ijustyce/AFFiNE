@@ -1,4 +1,5 @@
 #!/bin/bash
+rm -rf ~/Downloads/js/*
 cd ./packages/frontend/apps/web/dist/js/
 cp runtime.*.js ~/Downloads/js/
 cp i18n.*.js ~/Downloads/js/
